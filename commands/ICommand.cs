@@ -8,4 +8,16 @@ namespace commands
     {
         Task Execute(CancellationToken cancellationToken, IProgress<Double> progress);
     }
+    public interface ICommandIn<in TArgument>
+    {
+        Task Execute(TArgument argument, CancellationToken cancellationToken, IProgress<Double> progress);
+    }   
+    public interface ICommandOut<TResult>
+    {
+        Task<TResult> Execute(CancellationToken cancellationToken, IProgress<Double> progress);
+    }
+    public interface ICommand<in TArgument, TResult>
+    {
+        Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, IProgress<Double> progress);
+    }
 }
