@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace commands.wrappers
 {
-    internal sealed class ResultWrapper<TResult> : ICommand, IResult<TResult>
+    internal sealed class OutCommand<TResult> : ICommand, IResult<TResult>
     {
         private readonly ICommandOut<TResult> _command;
 
         public TResult Result {get; private set;}
 
-        internal ResultWrapper(ICommandOut<TResult> command){
+        internal OutCommand(ICommandOut<TResult> command){
             _command = command;
         }  
         public async Task Execute(CancellationToken cancellationToken, IProgress<Double> progress){

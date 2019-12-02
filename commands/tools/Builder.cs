@@ -15,20 +15,16 @@ namespace commands.tools
             _commands.Add(command);
             return this;
         }
-        public IBuilder Add<TArgument>(ICommandIn<TArgument> command, Func<TArgument> argGetter){
-            _commands.Add(new ArgWrapper<TArgument>(command, argGetter));
-            return this;
-        }
         public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command){
-            var resultCommand = new ResultWrapper<TResult>(command);
+            var resultCommand = new OutCommand<TResult>(command);
             _commands.Add(resultCommand);
             return new BuilderImpl<TResult>(_commands, resultCommand);
         }
         public ICommand Build() => null;
 
-        public static IBuilder Start() => new BuilderImpl(new List<ICommand>());
+        public static IBuilder Start(ICommand command) => new BuilderImpl(new List<ICommand>{command});
         public static IBuilder<TResult> Start<TResult>(ICommandOut<TResult> command){
-            var resultCommand = new ResultWrapper<TResult>(command);
+            var resultCommand = new OutCommand<TResult>(command);
             return new BuilderImpl<TResult>(new List<ICommand> { resultCommand }, resultCommand);
         }
         private sealed class BuilderImpl : Builder
@@ -43,8 +39,13 @@ namespace commands.tools
                 _result = result;
             }
             public IBuilder Add(ICommandIn<TArgument> command){
-                _commands.Add(new ResultConsumer<TArgument>(command, _result));
+                _commands.Add(new InCommand<TArgument>(command, _result));
                 return this;
+            }
+            public IBuilder<TResult> Add<TResult>(ICommand<TArgument, TResult> command)
+            {
+                var wrapper = new InOutCommand<TArgument, TResult>(command, _result);
+                return new BuilderImpl<TResult>(_commands, wrapper);
             }
         }
     }
