@@ -20,12 +20,12 @@ namespace commands.tools
             _commands.Add(resultCommand);
             return new BuilderImpl<TResult>(_commands, resultCommand);
         }
-        public ICommand Build() => null;
+        public ICommand Build() => new SequentialCommand(_commands);
 
         public static IBuilder Start(ICommand command) => new BuilderImpl(new List<ICommand>{command});
         public static IBuilder<TResult> Start<TResult>(ICommandOut<TResult> command){
             var resultCommand = new OutCommand<TResult>(command);
-            return new BuilderImpl<TResult>(new List<ICommand> { resultCommand }, resultCommand);
+            return new BuilderImpl<TResult>(new List<ICommand>{resultCommand}, resultCommand);
         }
         private sealed class BuilderImpl : Builder
         {
