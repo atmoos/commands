@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace commands.wrappers
 {
-    internal sealed class ResultWrapper<TResult> : ICommand
+    internal sealed class ResultWrapper<TResult> : ICommand, IResult<TResult>
     {
         private readonly ICommandOut<TResult> _command;
 

@@ -4,28 +4,48 @@ using commands.wrappers;
 
 namespace commands.tools
 {
-    public sealed class Builder
+    public abstract class Builder : IBuilder
     {
         private readonly List<ICommand> _commands;
 
         private Builder(List<ICommand> commands){
             _commands = commands;
         }
-        public Builder With<TArgument>(ICommandIn<TArgument> command, Func<TArgument> argumentGenerator){
-            _commands.Add(new ArgWrapper<TArgument>(command, argumentGenerator));
+        public IBuilder Add(ICommand command){
+            _commands.Add(command);
             return this;
         }
-        public Builder With<TResult>(ICommandOut<TResult> command, out Func<TResult> resultFetcher){
+        public IBuilder Add<TArgument>(ICommandIn<TArgument> command, Func<TArgument> argGetter){
+            _commands.Add(new ArgWrapper<TArgument>(command, argGetter));
+            return this;
+        }
+        public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command){
             var resultCommand = new ResultWrapper<TResult>(command);
             _commands.Add(resultCommand);
-            resultFetcher = () => resultCommand.Result;
-            return this;
-        }
-        public Builder With<TExchange>(ICommandOut<TExchange> prev, ICommandIn<TExchange> post){
-            return With<TExchange>(prev, out Func<TExchange> resultFetcher).With<TExchange>(post, resultFetcher);
+            return new BuilderImpl<TResult>(_commands, resultCommand);
         }
         public ICommand Build() => null;
 
-        public static Builder Start() => new Builder(new List<ICommand>());
+        public static IBuilder Start() => new BuilderImpl(new List<ICommand>());
+        public static IBuilder<TResult> Start<TResult>(ICommandOut<TResult> command){
+            var resultCommand = new ResultWrapper<TResult>(command);
+            return new BuilderImpl<TResult>(new List<ICommand> { resultCommand }, resultCommand);
+        }
+        private sealed class BuilderImpl : Builder
+        {
+            public BuilderImpl(List<ICommand> commands): base(commands){}
+        }
+
+        private sealed class BuilderImpl<TArgument> : Builder, IBuilder<TArgument>
+        {
+            private readonly IResult<TArgument> _result;
+            public BuilderImpl(List<ICommand> commands, IResult<TArgument> result): base(commands){
+                _result = result;
+            }
+            public IBuilder Add(ICommandIn<TArgument> command){
+                _commands.Add(new ResultConsumer<TArgument>(command, _result));
+                return this;
+            }
+        }
     }
 }
