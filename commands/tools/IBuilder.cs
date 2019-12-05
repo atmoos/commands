@@ -8,7 +8,6 @@ namespace commands.tools
     {
         IBuilder Add(ICommand command);
         IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command);
-        ICommand Build();
     }
 
     public interface IBuilder<TArgument> : IBuilder
