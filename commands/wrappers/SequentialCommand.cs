@@ -19,7 +19,5 @@ namespace commands.wrappers
             }
             cancellationToken.ThrowIfCancellationRequested();
         }
-
-
     }
 }

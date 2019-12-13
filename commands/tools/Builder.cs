@@ -43,7 +43,9 @@ namespace commands.tools
         }
         public IBuilder<TResult> Add<TResult>(ICommand<TArgument, TResult> command)
         {
-            return new Builder<TResult>(_commands, new InOutCommand<TArgument, TResult>(command, _result));
+            var resultCommand = new InOutCommand<TArgument, TResult>(command, _result);
+            _commands.Add(resultCommand);
+            return new Builder<TResult>(_commands, resultCommand);
         }
     }
 }

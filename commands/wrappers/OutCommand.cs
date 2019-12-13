@@ -10,9 +10,7 @@ namespace commands.wrappers
 
         public TResult Result {get; private set;}
 
-        internal OutCommand(ICommandOut<TResult> command){
-            _command = command;
-        }  
+        internal OutCommand(ICommandOut<TResult> command) => _command = command;
         public async Task Execute(CancellationToken cancellationToken, IProgress<Double> progress){
             Result = await _command.Execute(cancellationToken, progress).ConfigureAwait(false);
         }
