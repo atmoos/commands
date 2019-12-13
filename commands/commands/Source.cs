@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 
 namespace commands.commands
 {
-    public sealed class Source<TResult> : ICommandOut<TResult>
+    internal sealed class Source<TResult> : ICommandOut<TResult>
     {
-        private readonly Func<TResult> _source;
+        private readonly Func<CancellationToken, TResult> _source;
 
-        public Source(Func<TResult> source)
+        public Source(Func<TResult> source) : this(_ => source()){}
+        public Source(Func<CancellationToken, TResult> source)
         {
             _source = source;
         }
@@ -17,7 +18,7 @@ namespace commands.commands
         public async Task<TResult> Execute(CancellationToken cancellationToken, IProgress<double> progress)
         {
             await Task.Yield();
-            return _source();
+            return _source(cancellationToken);
         }
     }
 }
