@@ -1,6 +1,6 @@
 using System;
 
-namespace commands.progress
+namespace progress
 {
     public sealed class Progress
     {

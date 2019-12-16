@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace commands.progress
+namespace progress
 {
     public abstract class Reporter : IDisposable
     {

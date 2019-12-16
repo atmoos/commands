@@ -1,7 +1,7 @@
 using System;
 
 
-namespace commands.progress
+namespace progress
 {
     public struct State
     {
