@@ -1,30 +1,36 @@
 using System;
+using System.Threading;
 
 namespace progress
 {
     public sealed class Progress
     {
-        private Double _current;
-        private readonly String _process;
-        private readonly IProgress<State> _progress;
-        private Progress(String process, IProgress<State> progress){
-            _current = -1d;
-            _process = process;
-            _progress = progress;
+        private ProgressTree _tree;
+        private readonly IProgress<State> _stateReporter;
+
+        private Progress(ProgressTree tree, IProgress<State> stateReporter)
+        {
+            _tree = tree;
+            _stateReporter = stateReporter;
+        }
+        private void Pop() => _tree = _tree.Parent;
+        public Reporter Setup(Int32 iterations)
+        {
+            _tree = ProgressTree.Chain(_tree, 1d / iterations);
+            return Reporter.Create(_tree, iterations, Pop);
+        }
+        public Reporter Setup(String subProcess, Int32 iterations)
+        {
+            _tree = ProgressTree.Branch(_tree, Monotonic(subProcess, _stateReporter), 1d / iterations);
+            return Reporter.Create(_tree, iterations, Pop);
+        }
+        public Reporter Setup(TimeSpan expectedDuration) => null; // ToDo
+        public Reporter Setup(String subProcess, TimeSpan expectedDuration) => null; // ToDo
+        public static Progress Create(String process, IProgress<State> progress)
+        {
+            return new Progress(ProgressTree.Root(Monotonic(process, progress)), progress);
         }
 
-        private Progress Chain() => this; // ToDo!
-        public Reporter Setup(Int32 iterations) => Reporter.Create(Chain(), iterations);
-        public Reporter Setup(String subProcess, Int32 iterations) => Reporter.Create(Create(subProcess, _progress), iterations);
-        public Reporter Setup(TimeSpan expectedDuration) => Reporter.Create(Chain(), expectedDuration);
-        public Reporter Setup(String subProcess, TimeSpan expectedDuration) => Reporter.Create(Create(subProcess, _progress), expectedDuration);
-        internal void Report(Double progress)
-        {
-            if(progress > _current && 0d <= progress && progress <= 1d){
-                _current = progress;
-                _progress.Report(new State(_process, progress));
-            }
-        }
-        public static Progress Create(String process, IProgress<State> progress) => new Progress(process, progress);
+        private static IProgress<Double> Monotonic(String process, IProgress<State> progress) => new MonotonicProgress(new ProcessReporter(process, progress));
     }
 }

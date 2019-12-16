@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace commands.wrappers
 {
-    internal sealed class ActionCommand : ICommand
+    internal sealed class ActionCommand: ICommand
     {
         private readonly Action<CancellationToken> _action;
 
-        public ActionCommand(Action action): this(_ => action()) {}
+        public ActionCommand(Action action) : this(_ => action()) { }
         public ActionCommand(Action<CancellationToken> action)
         {
             _action = action;
@@ -21,11 +21,11 @@ namespace commands.wrappers
             _action(cancellationToken);
         }
     }
-    internal sealed class ActionCommand<TArgument, TResult> : ICommand<TArgument, TResult>
+    internal sealed class ActionCommand<TArgument, TResult>: ICommand<TArgument, TResult>
     {
         private readonly Func<TArgument, CancellationToken, TResult> _func;
 
-        public ActionCommand(Func<TArgument, TResult> func) : this((a,_) => func(a)){}
+        public ActionCommand(Func<TArgument, TResult> func) : this((a, _) => func(a)) { }
         public ActionCommand(Func<TArgument, CancellationToken, TResult> func)
         {
             _func = func;
