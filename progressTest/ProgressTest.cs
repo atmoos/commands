@@ -25,20 +25,16 @@ namespace commandsTest
         public void ReportsOnChildProgress()
         {
             const Int32 childIterations = 4;
-            const Int32 parentIterations = 4;
+            const Int32 parentIterations = 8;
             const String childProcess = "child";
             const String parentProcess = "parent";
             var expected = ExpectedProgress(childIterations * parentIterations);
             var report = new Reports();
             var progress = Progress.Create(parentProcess, report);
-            using (var parentReport = progress.Setup(parentIterations))
-            {
-                for (Int32 p = 0; p < parentIterations; ++p)
-                {
-                    using (var childReport = progress.Setup($"{childProcess} #{p:N2}", childIterations))
-                    {
-                        for (Int32 c = 0; c < childIterations; ++c)
-                        {
+            using(var parentReport = progress.Setup(parentIterations)) {
+                for(Int32 p = 0; p < parentIterations; ++p) {
+                    using(var childReport = progress.Setup($"{childProcess} #{p:N2}", childIterations)) {
+                        for(Int32 c = 0; c < childIterations; ++c) {
                             childReport.Report();
 
                         }
@@ -51,10 +47,8 @@ namespace commandsTest
 
         private static void GenerateProgress(Progress progress, Int32 iterations)
         {
-            using (Reporter reporter = progress.Setup(iterations))
-            {
-                foreach (var _ in Enumerable.Range(0, iterations))
-                {
+            using(Reporter reporter = progress.Setup(iterations)) {
+                foreach(var _ in Enumerable.Range(0, iterations)) {
                     reporter.Report();
                 }
             }
@@ -64,10 +58,8 @@ namespace commandsTest
         {
             var timer = Stopwatch.StartNew();
             var intervals = TimeSpan.FromTicks(duration.Ticks / 32);
-            using (Reporter reporter = progress.Setup(duration))
-            {
-                while (timer.Elapsed < duration)
-                {
+            using(Reporter reporter = progress.Setup(duration)) {
+                while(timer.Elapsed < duration) {
                     Thread.Sleep(intervals);
                 }
             }
@@ -85,8 +77,7 @@ namespace commandsTest
         }
         public void Report(State value)
         {
-            if (Progress.TryGetValue(value.Process, out List<Double> progress))
-            {
+            if(Progress.TryGetValue(value.Process, out List<Double> progress)) {
                 progress.Add(value.Progress);
                 return;
             }

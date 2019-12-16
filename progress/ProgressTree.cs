@@ -2,56 +2,58 @@ using System;
 
 namespace progress
 {
-    public class ProgressTree : IProgress<Double>
+    internal abstract class ProgressTree : IProgress<Double>
     {
-        private Double _current;
-        private readonly Double _weight;
-        private readonly IProgress<Double> _progress;
-
+        private readonly ProgressDriver _driver;
         public ProgressTree Parent { get; }
-
-        private ProgressTree(IProgress<Double> progressRoot)
+        private ProgressTree(ProgressDriver driver)
         {
-            _weight = 1d;
-            _current = 0d;
             Parent = this;
-            _progress = progressRoot;
+            _driver = driver;
         }
-        private ProgressTree(ProgressTree parent, IProgress<Double> progress, Double weight)
-        : this(progress)
+        private ProgressTree(ProgressDriver driver, ProgressTree parent)
+            : this(driver)
         {
-            if(weight < 0d || weight > 1d) {
-                var msg = $"Acepted range [0, 1]. Recieved: {weight:G3}";
-                throw new ArgumentOutOfRangeException(nameof(weight), weight, msg);
-            }
-            _weight = weight;
-            _progress = progress;
             Parent = parent;
         }
-        public void Report(Double progress)
+        public void Report() => ReportImpl(_driver.Advance());
+        public void Report(Double value) => ReportImpl(_driver.Accumulate(value));
+        protected abstract void ReportImpl(Double value);
+        public static ProgressTree Root(IProgress<Double> progress) => new RootNode(progress);
+        public static ProgressTree Chain(ProgressTree parent, ProgressDriver driver) => new ChainNode(driver, parent);
+        public static ProgressTree Branch(ProgressTree parent, ProgressDriver driver, IProgress<Double> progress) => new BranchNode(driver, parent, progress);
+        private sealed class RootNode : ProgressTree
         {
-            _current = progress;
-            UdateUpstream(progress);
+            private readonly IProgress<Double> _progressRoot;
+            public RootNode(IProgress<Double> progressRoot)
+                : base(ProgressDriver.Create(1))
+            {
+                _progressRoot = progressRoot;
+            }
+            protected override void ReportImpl(Double value) => _progressRoot.Report(value);
         }
-        private void UdateUpstream(Double increment)
+        private sealed class BranchNode : ProgressTree
         {
-            // Root
-            if(Parent == this) {
-                _progress.Report(increment);
-                return;
+            private readonly IProgress<Double> _progress;
+
+            public BranchNode(ProgressDriver driver, ProgressTree parent, IProgress<Double> progress)
+                : base(driver, parent)
+            {
+                _progress = progress;
             }
-            // Chain
-            if(_progress == Parent) {
-                Parent.Increment(increment);
-                return;
+            protected override void ReportImpl(Double value)
+            {
+                _progress.Report(value);
+                Parent.Report(value);
             }
-            // Branch!
-            _progress.Report(increment);
-            Parent.Increment(increment);
         }
-        private void Increment(Double increment) => UdateUpstream(_current + _weight * increment);
-        public static ProgressTree Root(IProgress<Double> progress) => new ProgressTree(progress);
-        public static ProgressTree Chain(ProgressTree parent, Double weight) => new ProgressTree(parent, parent, weight);
-        public static ProgressTree Branch(ProgressTree parent, IProgress<Double> progress, Double weight) => new ProgressTree(parent, progress, weight);
+        private sealed class ChainNode : ProgressTree
+        {
+            public ChainNode(ProgressDriver driver, ProgressTree parent)
+                : base(driver, parent)
+            {
+            }
+            protected override void ReportImpl(Double value) => Parent.Report(value);
+        }
     }
 }
