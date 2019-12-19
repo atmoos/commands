@@ -11,7 +11,6 @@ namespace progress
         public abstract Double Accumulate(Double childProgress);
         internal static ProgressDriver Create(Int32 expectedIterations) => new IterativeDriver(expectedIterations);
         internal static ProgressDriver Create(TimeSpan expectedDuration) => new TemporalDriver(expectedDuration);
-
         private sealed class IterativeDriver : ProgressDriver
         {
             private Int32 _currentIteration;
