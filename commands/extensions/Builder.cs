@@ -8,7 +8,6 @@ namespace commands.extensions
 {
     public static class Builder
     {
-
         public static IBuilder Add(this IBuilder builder, Action action) => builder.Add(new ActionCommand(action));
         public static IBuilder Add(this IBuilder builder, Action<CancellationToken> action) => builder.Add(new ActionCommand(action));
         public static IBuilder<TResult> Add<TResult>(this IBuilder builder, Func<TResult> func) => builder.Add(new Source<TResult>(func));
@@ -20,9 +19,9 @@ namespace commands.extensions
         public static IBuilder<TChain> Chain<TChain>(this IBuilder<TChain> builder, ICommand<TChain, TChain> command, UInt64 count) => builder.Repeat((b, _) => b.Add(command), count);
         public static IBuilder<TChain> Chain<TChain>(this IBuilder<TChain> builder, Func<UInt64, ICommand<TChain, TChain>> generator, UInt64 count) => builder.Repeat((b, i) => b.Add(generator(i)), count);
         private static TBuilder Repeat<TBuilder>(this TBuilder builder, Func<TBuilder, UInt64, TBuilder> repetition, UInt64 count)
-            where TBuilder: IBuilder
+            where TBuilder : IBuilder
         {
-            for(UInt64 iteration = 0; iteration < count; ++iteration){
+            for(UInt64 iteration = 0; iteration < count; ++iteration) {
                 builder = repetition(builder, iteration);
             }
             return builder;

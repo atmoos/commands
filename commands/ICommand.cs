@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using progress;
 
 namespace commands
 {
     public interface ICommand
     {
-        Task Execute(CancellationToken cancellationToken, IProgress<Double> progress);
+        Task Execute(CancellationToken cancellationToken, Progress progress);
     }
     public interface ICommandIn<in TArgument>
     {
-        Task Execute(TArgument argument, CancellationToken cancellationToken, IProgress<Double> progress);
-    }   
+        Task Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
+    }
     public interface ICommandOut<TResult>
     {
-        Task<TResult> Execute(CancellationToken cancellationToken, IProgress<Double> progress);
+        Task<TResult> Execute(CancellationToken cancellationToken, Progress progress);
     }
     public interface ICommand<in TArgument, TResult>
     {
-        Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, IProgress<Double> progress);
+        Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
     }
 }

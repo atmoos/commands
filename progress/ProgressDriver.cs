@@ -6,6 +6,7 @@ namespace progress
 {
     internal abstract class ProgressDriver
     {
+        public static ProgressDriver Empty { get; } = new EmptyDriver();
         private ProgressDriver() { }
         public abstract Double Advance();
         public abstract Double Accumulate(Double childProgress);
@@ -34,6 +35,13 @@ namespace progress
             }
             public override Double Advance() => _timer.Elapsed.TotalSeconds / _expectedDuration;
             public override Double Accumulate(Double _) => Advance();
+        }
+
+        private sealed class EmptyDriver : ProgressDriver
+        {
+            public override Double Accumulate(Double childProgress) => childProgress;
+
+            public override Double Advance() => 0d;
         }
     }
 }

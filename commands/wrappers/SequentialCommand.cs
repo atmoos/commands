@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using progress;
 
 namespace commands.wrappers
 {
@@ -9,13 +10,16 @@ namespace commands.wrappers
     {
         private readonly List<ICommand> _commands;
         public SequentialCommand(List<ICommand> commands) => _commands = commands;
-        public async Task Execute(CancellationToken cancellationToken, IProgress<Double> progress)
+        public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
-            foreach(var command in _commands) {
+            using(var reporter = progress.Setup(_commands.Count)) {
+                foreach(var command in _commands) {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    await command.Execute(cancellationToken, progress).ConfigureAwait(false);
+                    reporter.Report();
+                }
                 cancellationToken.ThrowIfCancellationRequested();
-                await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
-            cancellationToken.ThrowIfCancellationRequested();
         }
     }
 }

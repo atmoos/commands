@@ -5,6 +5,7 @@ namespace progress
 {
     public sealed class Progress
     {
+        public static Progress Empty { get; } = new Progress(ProgressTree.Empty, EmptyProgress<State>.Empty);
         private ProgressTree _tree;
         private readonly IProgress<State> _stateReporter;
         private Progress(ProgressTree tree, IProgress<State> stateReporter)

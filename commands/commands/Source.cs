@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using progress;
 
 namespace commands.commands
 {
@@ -9,16 +10,18 @@ namespace commands.commands
     {
         private readonly Func<CancellationToken, TResult> _source;
 
-        public Source(Func<TResult> source) : this(_ => source()){}
+        public Source(Func<TResult> source) : this(_ => source()) { }
         public Source(Func<CancellationToken, TResult> source)
         {
             _source = source;
         }
 
-        public async Task<TResult> Execute(CancellationToken cancellationToken, IProgress<double> progress)
+        public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
         {
-            await Task.Yield();
-            return _source(cancellationToken);
+            using(progress.Setup(1)) {
+                await Task.Yield();
+                return _source(cancellationToken);
+            }
         }
     }
 }

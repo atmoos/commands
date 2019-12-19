@@ -2,6 +2,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using progress;
 
 namespace commands.commands
 {
@@ -9,15 +10,17 @@ namespace commands.commands
     {
         private readonly Action<TArgument, CancellationToken> _sink;
 
-        public Sink(Action<TArgument> sink) : this((a, _) => sink(a)) {}
+        public Sink(Action<TArgument> sink) : this((a, _) => sink(a)) { }
         public Sink(Action<TArgument, CancellationToken> sink)
         {
             _sink = sink;
         }
-        public async Task Execute(TArgument argument, CancellationToken cancellationToken, IProgress<Double> progress)
+        public async Task Execute(TArgument argument, CancellationToken cancellationToken, Progress progress)
         {
-            await Task.Yield();
-            _sink(argument, cancellationToken);
+            using(progress.Setup(1)) {
+                await Task.Yield();
+                _sink(argument, cancellationToken);
+            }
         }
     }
 }

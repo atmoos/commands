@@ -8,7 +8,7 @@ using commands.commands;
 using commandsTest.commands;
 
 using static commands.extensions.Builder;
-
+using progress;
 
 namespace commandsTest
 {
@@ -23,7 +23,7 @@ namespace commandsTest
             Builder<Int32> compiler = Builder<Int32>.Start(Initialize.Create(0));
             compiler.Chain(increment, (UInt64)expectedSum).Add(result => actualSum = result);
             ICommand executor = compiler.Compile();
-            await executor.Execute(CancellationToken.None, null);
+            await executor.Execute(CancellationToken.None, Progress.Empty);
             Assert.Equal(expectedSum, actualSum);
         }
     }

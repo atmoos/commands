@@ -4,6 +4,7 @@ namespace progress
 {
     internal abstract class ProgressTree : IProgress<Double>
     {
+        public static ProgressTree Empty { get; } = new EmptyTree();
         private readonly ProgressDriver _driver;
         public ProgressTree Parent { get; }
         private ProgressTree(ProgressDriver driver)
@@ -54,6 +55,18 @@ namespace progress
             {
             }
             protected override void ReportImpl(Double value) => Parent.Report(value);
+        }
+
+        private sealed class EmptyTree : ProgressTree
+        {
+            public EmptyTree() : base(ProgressDriver.Empty)
+            {
+            }
+
+            protected override void ReportImpl(Double _)
+            {
+                // empty
+            }
         }
     }
 }
