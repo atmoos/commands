@@ -12,9 +12,9 @@ namespace progress
         public abstract Double Accumulate(Double childProgress);
         internal static ProgressDriver Create(Int32 expectedIterations) => new IterativeDriver(expectedIterations);
         internal static ProgressDriver Create(TimeSpan expectedDuration) => new TemporalDriver(expectedDuration);
-        internal static ProgressDriver Create<TProcess>(TProcess target, Func<TProcess> progressGetter, Func<TProcess, Double> linearization)
+        internal static ProgressDriver Create<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress)
         {
-            return new FunctionalDriver<TProcess>(target, progressGetter, linearization);
+            return new FunctionalDriver<TProgress>(target, nlProgress);
         }
         private sealed class IterativeDriver : ProgressDriver
         {
@@ -42,28 +42,28 @@ namespace progress
         }
         private sealed class FunctionalDriver<TProgress> : ProgressDriver
         {
+            private Double _stepSize;
             private Double _currentDelta;
             private readonly Double _range;
             private readonly Double _lower;
             private readonly TProgress _target;
-            private readonly Func<TProgress> _getProgress;
-            private readonly Func<TProgress, Double> _linearize;
-            public FunctionalDriver(TProgress target, Func<TProgress> getProgress, Func<TProgress, Double> linearize)
+            private readonly INonLinearProgress<TProgress> _nlProgress;
+            public FunctionalDriver(TProgress target, INonLinearProgress<TProgress> nlProgress)
             {
                 _target = target;
-                _getProgress = getProgress;
-                _linearize = linearize;
-                _lower = _linearize(_getProgress());
-                _range = Math.Abs(linearize(target) - _lower);
-                _currentDelta = 0d;
+                _nlProgress = nlProgress;
+                _lower = nlProgress.Linearize(nlProgress.Progress());
+                _range = Math.Abs(nlProgress.Linearize(target) - _lower);
+                _currentDelta = _stepSize = 0d;
             }
             public override Double Advance()
             {
-                Double delta = Math.Abs(_linearize(_getProgress()) - _lower);
-                Interlocked.Exchange(ref _currentDelta, delta);
+                Double delta = Math.Abs(_nlProgress.Linearize(_nlProgress.Progress()) - _lower);
+                Double stepSize = delta - Interlocked.Exchange(ref _currentDelta, delta);
+                Interlocked.Exchange(ref _stepSize, 0.96 * stepSize + 0.04 * _stepSize);
                 return delta / _range;
             }
-            public override Double Accumulate(Double childProgress) => (_currentDelta + childProgress) / _range;
+            public override Double Accumulate(Double childProgress) => (_currentDelta + _stepSize * childProgress) / _range;
         }
         private sealed class EmptyDriver : ProgressDriver
         {
@@ -71,5 +71,20 @@ namespace progress
 
             public override Double Advance() => 0d;
         }
+    }
+
+    public sealed class NlProgressAdapter<TPrgress> : INonLinearProgress<TPrgress>
+    {
+        private readonly Func<TPrgress> _getProgress;
+        private readonly Func<TPrgress, Double> _linearize;
+
+        public NlProgressAdapter(Func<TPrgress> getProgress, Func<TPrgress, Double> linearize)
+        {
+            _getProgress = getProgress;
+            _linearize = linearize;
+        }
+
+        public TPrgress Progress() => _getProgress();
+        public Double Linearize(TPrgress progress) => _linearize(progress);
     }
 }

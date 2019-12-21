@@ -6,7 +6,7 @@ using Xunit;
 using System.Diagnostics;
 using System.Threading;
 
-namespace commandsTest
+namespace progressTest
 {
     public class ProgressTest
     {

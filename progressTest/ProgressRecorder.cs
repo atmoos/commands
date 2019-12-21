@@ -1,0 +1,15 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace progressTest
+{
+    public sealed class ProgressRecorder<TProgress> : IProgress<TProgress>, IEnumerable<TProgress>
+    {
+        public List<TProgress> _record = new List<TProgress>();
+        public TProgress this[Int32 index] { get { return _record[index]; } }
+        public IEnumerator<TProgress> GetEnumerator() => _record.GetEnumerator();
+        public void Report(TProgress value) => _record.Add(value);
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
+}

@@ -39,9 +39,9 @@ namespace progress
             var driver = ProgressDriver.Create(expectedDuration);
             return Reporter(ProgressTree.Branch(_tree, driver, Monotonic(subProcess, _stateReporter)));
         }
-        public Reporter Setup<TProcess>(TProcess target, Func<TProcess> progressGetter, Func<TProcess, Double> linearization)
+        public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress)
         {
-            var driver = ProgressDriver.Create(target, progressGetter, linearization);
+            var driver = ProgressDriver.Create(target, nlProgress);
             return Reporter(ProgressTree.Chain(_tree, driver));
         }
         public static Progress Create(String process, IProgress<State> progress)
