@@ -22,27 +22,27 @@ namespace progress
         public Reporter Setup(Int32 iterations)
         {
             var driver = ProgressDriver.Create(iterations);
-            return Reporter(ProgressTree.Chain(_tree, driver));
+            return Reporter(_tree.Chain(driver));
         }
         public Reporter Setup(String subProcess, Int32 iterations)
         {
             var driver = ProgressDriver.Create(iterations);
-            return Reporter(ProgressTree.Branch(_tree, driver, Monotonic(subProcess, _stateReporter)));
+            return Reporter(_tree.Branch(driver, Monotonic(subProcess, _stateReporter)));
         }
         public Reporter Setup(TimeSpan expectedDuration)
         {
             var driver = ProgressDriver.Create(expectedDuration);
-            return Reporter(ProgressTree.Chain(_tree, driver));
+            return Reporter(_tree.Chain(driver));
         }
         public Reporter Setup(String subProcess, TimeSpan expectedDuration)
         {
             var driver = ProgressDriver.Create(expectedDuration);
-            return Reporter(ProgressTree.Branch(_tree, driver, Monotonic(subProcess, _stateReporter)));
+            return Reporter(_tree.Branch(driver, Monotonic(subProcess, _stateReporter)));
         }
         public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress)
         {
             var driver = ProgressDriver.Create(target, nlProgress);
-            return Reporter(ProgressTree.Chain(_tree, driver));
+            return Reporter(_tree.Chain(driver));
         }
         public static Progress Create(String process, IProgress<State> progress)
         {

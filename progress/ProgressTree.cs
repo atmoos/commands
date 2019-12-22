@@ -20,9 +20,9 @@ namespace progress
         public void Report() => ReportImpl(_driver.Advance());
         public void Report(Double value) => ReportImpl(_driver.Accumulate(value));
         protected abstract void ReportImpl(Double value);
+        public ProgressTree Chain(ProgressDriver driver) => new ChainNode(driver, this);
+        public ProgressTree Branch(ProgressDriver driver, IProgress<Double> progress) => new BranchNode(driver, this, progress);
         public static ProgressTree Root(IProgress<Double> progress) => new RootNode(progress);
-        public static ProgressTree Chain(ProgressTree parent, ProgressDriver driver) => new ChainNode(driver, parent);
-        public static ProgressTree Branch(ProgressTree parent, ProgressDriver driver, IProgress<Double> progress) => new BranchNode(driver, parent, progress);
         private sealed class RootNode : ProgressTree
         {
             private readonly IProgress<Double> _progressRoot;
@@ -62,7 +62,6 @@ namespace progress
             public EmptyTree() : base(ProgressDriver.Empty)
             {
             }
-
             protected override void ReportImpl(Double _)
             {
                 // empty
