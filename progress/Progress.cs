@@ -6,11 +6,8 @@ namespace progress
     public sealed class Progress
     {
         public static Progress Empty { get; } = new Progress(EmptyProgress<Double>.Empty);
-        private IProgress<Double> _tree;
-        private Progress(IProgress<Double> tree)
-        {
-            _tree = tree;
-        }
+        private readonly Stack<IProgress<Double>> _stack;
+        private Progress(IProgress<Double> root) => _stack = new Stack<IProgress<Double>>(root);
         public Reporter Setup(Int32 iterations) => Chain(ProgressDriver.Create(iterations));
         public Reporter Setup(Int32 iterations, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(iterations), subProgress);
         public Reporter Setup(TimeSpan expectedDuration) => Chain(ProgressDriver.Create(expectedDuration));
@@ -20,13 +17,13 @@ namespace progress
         public static Progress Create(IProgress<Double> progress) => new Progress(new MonotonicProgress(progress));
         private Reporter Chain(ProgressDriver driver)
         {
-            return new Reporter(driver, Interlocked.Exchange(ref _tree, new DriverAdapter(driver, _tree)), Push);
+            IProgress<Double> progress = _stack.Push(new DriverAdapter(driver, _stack.Peek()));
+            return new Reporter(driver, progress, _stack.ResetWith(progress));
         }
         private Reporter Branch(ProgressDriver driver, IProgress<Double> subProgress)
         {
-            var zip = new MonotonicProgress(new ProgressZip<Double>(subProgress, _tree));
-            return new Reporter(driver, zip, Interlocked.Exchange(ref _tree, new DriverAdapter(driver, zip)), Push);
+            var zip = new MonotonicProgress(new ProgressZip<Double>(subProgress, _stack.Peek()));
+            return new Reporter(driver, zip, _stack.ResetWith(_stack.Push(new DriverAdapter(driver, zip))));
         }
-        private void Push(IProgress<Double> tree) => Interlocked.Exchange(ref _tree, tree);
     }
 }

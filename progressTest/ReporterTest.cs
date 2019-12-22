@@ -8,13 +8,15 @@ namespace progressTest
 {
     public sealed class ReporterTest
     {
-        private IProgress<Double> _pushedProgress;
+
+        private readonly Reset _reset;
         private readonly Reporter _reporter;
         private readonly ProgressRecorder<Double> _progress;
         public ReporterTest()
         {
+            _reset = new Reset();
             _progress = new ProgressRecorder<Double>();
-            _reporter = new Reporter(ProgressDriver.Create(3), _progress, Reset);
+            _reporter = new Reporter(ProgressDriver.Create(3), _progress, _reset);
         }
         [Fact]
         public void ZeroIsReportedUponCreation()
@@ -29,14 +31,15 @@ namespace progressTest
         }
 
         [Fact]
-        public void ProgressIsPushedBackUponDisposal()
+        public void ResetIsPerformedUponDisposal()
         {
             _reporter.Dispose();
-            Assert.Same(_progress, _pushedProgress);
+            Assert.True(_reset.Disposed, "Reset action must be called!");
         }
-        private void Reset(IProgress<Double> tree)
+        private sealed class Reset : IDisposable
         {
-            _pushedProgress = tree;
+            public Boolean Disposed { get; private set; } = false;
+            public void Dispose() => Disposed = true;
         }
     }
 }
