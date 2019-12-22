@@ -58,9 +58,12 @@ namespace progress
             }
             public override Double Advance()
             {
+                // const values are parameters for simple IIR filter
+                const Double a = 3d / 5d;
+                const Double b = 1d - a;
                 Double delta = Math.Abs(_nlProgress.Linearize(_nlProgress.Progress()) - _lower);
                 Double stepSize = delta - Interlocked.Exchange(ref _currentDelta, delta);
-                Interlocked.Exchange(ref _stepSize, 0.96 * stepSize + 0.04 * _stepSize);
+                Interlocked.Exchange(ref _stepSize, a * stepSize + b * _stepSize);
                 return delta / _range;
             }
             public override Double Accumulate(Double childProgress) => (_currentDelta + _stepSize * childProgress) / _range;
@@ -73,18 +76,17 @@ namespace progress
         }
     }
 
-    public sealed class NlProgressAdapter<TPrgress> : INonLinearProgress<TPrgress>
+    public sealed class NlProgressAdapter<TProgress> : INonLinearProgress<TProgress>
     {
-        private readonly Func<TPrgress> _getProgress;
-        private readonly Func<TPrgress, Double> _linearize;
+        private readonly Func<TProgress> _getProgress;
+        private readonly Func<TProgress, Double> _linearize;
 
-        public NlProgressAdapter(Func<TPrgress> getProgress, Func<TPrgress, Double> linearize)
+        public NlProgressAdapter(Func<TProgress> getProgress, Func<TProgress, Double> linearize)
         {
             _getProgress = getProgress;
             _linearize = linearize;
         }
-
-        public TPrgress Progress() => _getProgress();
-        public Double Linearize(TPrgress progress) => _linearize(progress);
+        public TProgress Progress() => _getProgress();
+        public Double Linearize(TProgress progress) => _linearize(progress);
     }
 }

@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using progress;
 using Xunit;
+using progress;
 
 namespace progressTest
 {
     public interface IDriverTest
     {
         void AdvanceIsLinear();
-        void AdvanceIsMonotonic();
-        void AccumulateIsBoundedByAdvance();
+        void AdvanceIsStrictlyMonotonic();
+        void AccumulateIsBoundedByAdvance(Double childProgress);
     }
 
     public interface IIdempotentAccumulate
@@ -22,7 +22,6 @@ namespace progressTest
         private readonly Int32 _precision;
         private readonly ProgressDriver _driver;
         public Int32 Granularity { get; }
-
         public DriverTestHarness(ProgressDriver driver, Int32 granularity = 16, Int32 precision = 15)
         {
             _driver = driver;
@@ -35,35 +34,28 @@ namespace progressTest
             var actual = Enumerable.Repeat(0d, Granularity).Select(_ => _driver.Accumulate(0d));
             Assert.Equal(expected, actual);
         }
-        public void AccumulateIsBoundedByAdvance()
+        public void AccumulateIsBoundedByAdvance(Double childProgress)
         {
+            Assert.InRange(childProgress, 0d, 1d); // sanity check of input values!
             Double lowerAdvance = _driver.Advance();
             foreach(var _ in Enumerable.Range(1, Granularity)) {
-                Double actual = _driver.Accumulate(0.5);
+                Double actual = _driver.Accumulate(childProgress);
                 Double upperAdvance = _driver.Advance();
                 Assert.InRange(actual, lowerAdvance, upperAdvance);
                 lowerAdvance = upperAdvance;
             }
         }
-        public void AdvanceIsMonotonic()
+        public void AdvanceIsStrictlyMonotonic()
         {
-            Double lowerAdvance = Double.NegativeInfinity;
+            Double prevValue = Double.NegativeInfinity;
             foreach(var _ in Enumerable.Range(0, Granularity)) {
-                Double actualAdvancment = _driver.Advance();
-                Assert.InRange(actualAdvancment, lowerAdvance, Double.PositiveInfinity);
-                lowerAdvance = actualAdvancment;
+                Double actualValue = _driver.Advance();
+                Assert.NotStrictEqual(prevValue, actualValue);
+                Assert.InRange(actualValue, prevValue, Double.PositiveInfinity);
+                prevValue = actualValue;
             }
         }
         public void AdvanceIsLinear() => Assert.Equal(0d, Gradient(AllDeltas()), _precision);
-
-        private IEnumerable<Double> AllAdvances()
-        {
-            Double value;
-            while((value = _driver.Advance()) <= 1d) {
-                yield return value;
-            }
-        }
-
         private IEnumerable<Double> AllDeltas()
         {
             Double prevValue = _driver.Advance();
@@ -81,6 +73,14 @@ namespace progressTest
             Double scaledValues = values.Select((y, x) => x * (y - meanY)).Sum();
             return scaledValues / spread;
         }
+        public static IEnumerable<Object[]> ChildProgress()
+        {
+            yield return new Object[] { 0d };
+            yield return new Object[] { 1d / 3d };
+            yield return new Object[] { 0.5d };
+            yield return new Object[] { 2d / 3d };
+            yield return new Object[] { 1d };
+        }
     }
 
     public sealed class IterativeDriverTest : IDriverTest, IIdempotentAccumulate
@@ -94,24 +94,25 @@ namespace progressTest
         }
         [Fact]
         public void AccumulateIsIdempotent() => _harness.AccumulateIsIdempotent();
+        [Theory]
+        [MemberData(nameof(DriverTestHarness.ChildProgress), MemberType = typeof(DriverTestHarness))]
+        public void AccumulateIsBoundedByAdvance(Double childProgress) => _harness.AccumulateIsBoundedByAdvance(childProgress);
         [Fact]
-        public void AccumulateIsBoundedByAdvance() => _harness.AccumulateIsBoundedByAdvance();
-        [Fact]
-        public void AdvanceIsMonotonic() => _harness.AdvanceIsMonotonic();
+        public void AdvanceIsStrictlyMonotonic() => _harness.AdvanceIsStrictlyMonotonic();
         [Fact]
         public void AdvanceIsLinear() => _harness.AdvanceIsLinear();
     }
 
     public sealed class TemporalDriverTest : IDriverTest
     {
-        readonly DriverTestHarness _harness = new DriverTestHarness(ProgressDriver.Create(TimeSpan.FromMilliseconds(8)), precision: 8);
-
-        [Fact]
-        public void AccumulateIsBoundedByAdvance() => _harness.AccumulateIsBoundedByAdvance();
+        readonly DriverTestHarness _harness = new DriverTestHarness(ProgressDriver.Create(TimeSpan.FromMilliseconds(8)), precision: 9);
+        [Theory]
+        [MemberData(nameof(DriverTestHarness.ChildProgress), MemberType = typeof(DriverTestHarness))]
+        public void AccumulateIsBoundedByAdvance(Double childProgress) => _harness.AccumulateIsBoundedByAdvance(childProgress);
         [Fact]
         public void AdvanceIsLinear() => _harness.AdvanceIsLinear();
         [Fact]
-        public void AdvanceIsMonotonic() => _harness.AdvanceIsMonotonic();
+        public void AdvanceIsStrictlyMonotonic() => _harness.AdvanceIsStrictlyMonotonic();
     }
 
     public sealed class NonLinearDriverTest : INonLinearProgress<Decimal>, IDriverTest, IIdempotentAccumulate
@@ -127,10 +128,11 @@ namespace progressTest
         }
         [Fact]
         public void AccumulateIsIdempotent() => _harness.AccumulateIsIdempotent();
+        [Theory]
+        [MemberData(nameof(DriverTestHarness.ChildProgress), MemberType = typeof(DriverTestHarness))]
+        public void AccumulateIsBoundedByAdvance(Double childProgress) => _harness.AccumulateIsBoundedByAdvance(childProgress);
         [Fact]
-        public void AccumulateIsBoundedByAdvance() => _harness.AccumulateIsBoundedByAdvance();
-        [Fact]
-        public void AdvanceIsMonotonic() => _harness.AdvanceIsMonotonic();
+        public void AdvanceIsStrictlyMonotonic() => _harness.AdvanceIsStrictlyMonotonic();
         [Fact]
         public void AdvanceIsLinear() => _harness.AdvanceIsLinear();
         Double INonLinearProgress<Decimal>.Linearize(Decimal progress) => Math.Sqrt((Double)progress);
