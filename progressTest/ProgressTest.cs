@@ -14,11 +14,10 @@ namespace progressTest
         public void IterativeProgress()
         {
             const Int32 iterations = 8;
-            const String process = "test";
+            var actual = new ProgressRecorder<Double>();
             var expected = ExpectedProgress(iterations);
-            var report = new Reports();
-            GenerateProgress(Progress.Create(process, report), iterations);
-            Assert.Equal(expected, report.Progress[process]);
+            GenerateProgress(Progress.Create(actual), iterations);
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -26,23 +25,23 @@ namespace progressTest
         {
             const Int32 childIterations = 4;
             const Int32 parentIterations = 8;
-            const String childProcess = "child";
-            const String parentProcess = "parent";
-            var expected = ExpectedProgress(childIterations * parentIterations);
-            var report = new Reports();
-            var progress = Progress.Create(parentProcess, report);
+            var childProgress = new List<IEnumerable<Double>>();
+            var actualParentProgress = new ProgressRecorder<Double>();
+            var progress = Progress.Create(actualParentProgress);
             using(var parentReport = progress.Setup(parentIterations)) {
                 for(Int32 p = 0; p < parentIterations; ++p) {
-                    using(var childReport = progress.Setup($"{childProcess} #{p:N2}", childIterations)) {
+                    var subProgress = new ProgressRecorder<Double>();
+                    using(var childReport = progress.Setup(childIterations, subProgress)) {
+                        childProgress.Add(subProgress);
                         for(Int32 c = 0; c < childIterations; ++c) {
                             childReport.Report();
-
                         }
                     }
                     parentReport.Report();
                 }
             }
-            Assert.Equal(expected, report.Progress[parentProcess]);
+            Assert.Equal(ExpectedProgress(childIterations), childProgress[0]);
+            Assert.Equal(ExpectedProgress(childIterations * parentIterations), actualParentProgress);
         }
 
         private static void GenerateProgress(Progress progress, Int32 iterations)
@@ -66,22 +65,5 @@ namespace progressTest
         }
 
         private List<Double> ExpectedProgress(Int32 iterations) => Enumerable.Range(0, iterations + 1).Select(i => ((double)i) / iterations).ToList();
-    }
-
-    internal class Reports : IProgress<State>
-    {
-        public Dictionary<String, List<Double>> Progress { get; }
-        public Reports()
-        {
-            Progress = new Dictionary<String, List<Double>>();
-        }
-        public void Report(State value)
-        {
-            if(Progress.TryGetValue(value.Process, out List<Double> progress)) {
-                progress.Add(value.Progress);
-                return;
-            }
-            Progress[value.Process] = new List<Double>() { value.Progress };
-        }
     }
 }

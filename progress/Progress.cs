@@ -5,49 +5,28 @@ namespace progress
 {
     public sealed class Progress
     {
-        public static Progress Empty { get; } = new Progress(ProgressTree.Empty, EmptyProgress<State>.Empty);
-        private ProgressTree _tree;
-        private readonly IProgress<State> _stateReporter;
-        private Progress(ProgressTree tree, IProgress<State> stateReporter)
+        public static Progress Empty { get; } = new Progress(EmptyProgress<Double>.Empty);
+        private IProgress<Double> _tree;
+        private Progress(IProgress<Double> tree)
         {
             _tree = tree;
-            _stateReporter = stateReporter;
         }
-        private void Set(ProgressTree tree) => Interlocked.Exchange(ref _tree, tree);
-        private Reporter Reporter(ProgressTree tree)
+        public Reporter Setup(Int32 iterations) => Chain(ProgressDriver.Create(iterations));
+        public Reporter Setup(Int32 iterations, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(iterations), subProgress);
+        public Reporter Setup(TimeSpan expectedDuration) => Chain(ProgressDriver.Create(expectedDuration));
+        public Reporter Setup(TimeSpan expectedDuration, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(expectedDuration), subProgress);
+        public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress) => Chain(ProgressDriver.Create(target, nlProgress));
+        public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(target, nlProgress), subProgress);
+        public static Progress Create(IProgress<Double> progress) => new Progress(new MonotonicProgress(progress));
+        private Reporter Chain(ProgressDriver driver)
         {
-            Set(tree);
-            return new Reporter(tree, Set);
+            return new Reporter(driver, Interlocked.Exchange(ref _tree, new DriverAdapter(driver, _tree)), Push);
         }
-        public Reporter Setup(Int32 iterations)
+        private Reporter Branch(ProgressDriver driver, IProgress<Double> subProgress)
         {
-            var driver = ProgressDriver.Create(iterations);
-            return Reporter(_tree.Chain(driver));
+            var zip = new MonotonicProgress(new ProgressZip<Double>(subProgress, _tree));
+            return new Reporter(driver, zip, Interlocked.Exchange(ref _tree, new DriverAdapter(driver, zip)), Push);
         }
-        public Reporter Setup(String subProcess, Int32 iterations)
-        {
-            var driver = ProgressDriver.Create(iterations);
-            return Reporter(_tree.Branch(driver, Monotonic(subProcess, _stateReporter)));
-        }
-        public Reporter Setup(TimeSpan expectedDuration)
-        {
-            var driver = ProgressDriver.Create(expectedDuration);
-            return Reporter(_tree.Chain(driver));
-        }
-        public Reporter Setup(String subProcess, TimeSpan expectedDuration)
-        {
-            var driver = ProgressDriver.Create(expectedDuration);
-            return Reporter(_tree.Branch(driver, Monotonic(subProcess, _stateReporter)));
-        }
-        public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress)
-        {
-            var driver = ProgressDriver.Create(target, nlProgress);
-            return Reporter(_tree.Chain(driver));
-        }
-        public static Progress Create(String process, IProgress<State> progress)
-        {
-            return new Progress(ProgressTree.Root(Monotonic(process, progress)), progress);
-        }
-        private static IProgress<Double> Monotonic(String process, IProgress<State> progress) => new MonotonicProgress(new ProcessReporter(process, progress));
+        private void Push(IProgress<Double> tree) => Interlocked.Exchange(ref _tree, tree);
     }
 }
