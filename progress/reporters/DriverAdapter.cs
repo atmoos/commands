@@ -1,6 +1,6 @@
 using System;
 
-namespace progress
+namespace progress.reporters
 {
     internal sealed class DriverAdapter : IProgress<Double>
     {

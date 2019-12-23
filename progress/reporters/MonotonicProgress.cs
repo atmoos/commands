@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace progress
+namespace progress.reporters
 {
     public sealed class MonotonicProgress : IProgress<Double>
     {

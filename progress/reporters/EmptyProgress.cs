@@ -1,6 +1,6 @@
 using System;
 
-namespace progress
+namespace progress.reporters
 {
     public sealed class EmptyProgress<TProgress> : IProgress<TProgress>
     {

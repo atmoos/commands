@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using progress.reporters;
 
 namespace progress
 {

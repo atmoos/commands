@@ -1,6 +1,6 @@
 using System;
 
-namespace progress
+namespace progress.reporters
 {
     public sealed class ProgressZip<TProgress> : IProgress<TProgress>
     {
