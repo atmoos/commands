@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using Xunit;
 using progress;
 
@@ -35,6 +34,18 @@ namespace progressTest
         {
             _reporter.Dispose();
             Assert.True(_reset.Disposed, "Reset action must be called!");
+        }
+        [Fact]
+        public void ReportAdvancesProgress()
+        {
+            const Int32 steps = 4;
+            var progress = new ProgressRecorder<Double>();
+            using(var reporter = new Reporter(ProgressDriver.Create(steps), progress, _reset)) {
+                foreach(var _ in Enumerable.Range(0, steps)) {
+                    reporter.Report();
+                }
+            }
+            Assert.Equal(Enumerable.Range(0, steps + 1).Select(v => ((Double)v) / steps).Append(1d), progress);
         }
         private sealed class Reset : IDisposable
         {
