@@ -12,7 +12,7 @@ namespace progress
             _element = element;
         }
         public TElement Peek() => _element;
-        public IDisposable ResetWith(TElement element) => new Token(this, element);
+        public IDisposable RegisterReset(TElement element) => new Token(this, element);
         public TElement Push(TElement element) => Interlocked.Exchange(ref _element, element);
         private sealed class Token : IDisposable
         {

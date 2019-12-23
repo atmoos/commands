@@ -18,12 +18,12 @@ namespace progress
         private Reporter Chain(ProgressDriver driver)
         {
             IProgress<Double> progress = _stack.Push(new DriverAdapter(driver, _stack.Peek()));
-            return new Reporter(driver, progress, _stack.ResetWith(progress));
+            return new Reporter(driver, progress, _stack.RegisterReset(progress));
         }
         private Reporter Branch(ProgressDriver driver, IProgress<Double> subProgress)
         {
             var zip = new MonotonicProgress(new ProgressZip<Double>(subProgress, _stack.Peek()));
-            return new Reporter(driver, zip, _stack.ResetWith(_stack.Push(new DriverAdapter(driver, zip))));
+            return new Reporter(driver, zip, _stack.RegisterReset(_stack.Push(new DriverAdapter(driver, zip))));
         }
     }
 }
