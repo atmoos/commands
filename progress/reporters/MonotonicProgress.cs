@@ -6,27 +6,38 @@ namespace progress.reporters
     public sealed class MonotonicProgress : IProgress<Double>
     {
         private Double _current;
-        private readonly Double _lowerBound;
-        private readonly Double _upperBound;
         private readonly IProgress<Double> _progress;
-        public MonotonicProgress(IProgress<Double> progress, Double lowerBound = 0d, Double upperBound = 1d)
+        public MonotonicProgress(IProgress<Double> progress)
         {
-            if(upperBound <= lowerBound) {
-                var msg = $"Progress must increase monotonically. Recieved range [lower: '{lowerBound}', upper: '{upperBound}'].";
-                throw new ArgumentNullException(msg);
-            }
             _progress = progress;
-            _lowerBound = lowerBound;
-            _upperBound = upperBound;
-            _current = lowerBound - 1d;
+            _current = Double.NegativeInfinity;
         }
-        public void Report(Double progress)
+        public void Report(Double value)
         {
-            if(progress <= _current || progress < _lowerBound || progress > _upperBound) {
+            if(value <= _current) {
                 return;
             }
-            Interlocked.Exchange(ref _current, progress);
-            _progress.Report(progress);
+            Interlocked.Exchange(ref _current, value);
+            _progress.Report(value);
+        }
+    }
+    public sealed class MonotonicProgress<TProgress> : IProgress<TProgress>
+   where TProgress : class, IComparable<TProgress>
+    {
+        private TProgress _current;
+        private readonly IProgress<TProgress> _progress;
+        public MonotonicProgress(IProgress<TProgress> progress, TProgress init = default)
+        {
+            _progress = progress;
+            _current = init;
+        }
+        public void Report(TProgress value)
+        {
+            if(_current.CompareTo(value) > 0) {
+                return;
+            }
+            Interlocked.Exchange(ref _current, value);
+            _progress.Report(value);
         }
     }
 }
