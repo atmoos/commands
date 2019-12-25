@@ -16,7 +16,7 @@ namespace progress
             _progress.Report(0);
         }
         public void Report() => _progress.Report(_driver.Advance());
-        public IProgress<Double> Export() => new MonotonicProgress(new DriverAdapter(_driver, _progress));
+        public IProgress<Double> Export() => MonotonicProgress.Strictly.Increasing(new DriverAdapter(_driver, _progress));
         public void Dispose()
         {
             _progress.Report(1d);

@@ -14,7 +14,7 @@ namespace progress
         public Reporter Setup(TimeSpan expectedDuration, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(expectedDuration), subProgress);
         public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress) => Chain(ProgressDriver.Create(target, nlProgress));
         public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(target, nlProgress), subProgress);
-        public static Progress Create(IProgress<Double> progress) => new Progress(new MonotonicProgress(progress));
+        public static Progress Create(IProgress<Double> progress) => new Progress(MonotonicProgress.Strictly.Increasing(progress));
         private Reporter Chain(ProgressDriver driver)
         {
             IProgress<Double> progress = _stack.Push(new DriverAdapter(driver, _stack.Peek()));
@@ -22,7 +22,7 @@ namespace progress
         }
         private Reporter Branch(ProgressDriver driver, IProgress<Double> subProgress)
         {
-            var zip = new MonotonicProgress(new ProgressZip<Double>(subProgress, _stack.Peek()));
+            var zip = MonotonicProgress.Strictly.Increasing(new ProgressZip<Double>(subProgress, _stack.Peek()));
             return new Reporter(driver, zip, _stack.RegisterReset(_stack.Push(new DriverAdapter(driver, zip))));
         }
     }
