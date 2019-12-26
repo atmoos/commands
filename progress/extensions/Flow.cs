@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,15 +29,14 @@ namespace progress.extensions
                 }
             }
         }
-        public static async IAsyncEnumerable<TimeSpan> Time(this Progress progress, [EnumeratorCancellation]CancellationToken token, TimeSpan duration, TimeSpan interval)
+        public static async IAsyncEnumerable<TimeSpan> AtIntervalls(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
         {
             using(Reporter reporter = progress.Setup(duration)) {
-                var timer = Stopwatch.StartNew();
-                while(timer.Elapsed < duration) {
-                    await Task.Delay(interval, token).ConfigureAwait(false);
-                    yield return timer.Elapsed;
-                    reporter.Report();
-                }
+                await using(var enumerator = new TimerStream(interval).GetAsyncEnumerator(token))
+                    while(await enumerator.MoveNextAsync() && enumerator.Current < duration) {
+                        reporter.Report();
+                        yield return enumerator.Current;
+                    }
             }
         }
 
