@@ -5,21 +5,20 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using progress.reporters;
 
 namespace progress.extensions
 {
     public static class Flow
     {
-        public static IEnumerable<TElement> Loop<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token)
+        public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token)
         {
-            return progress.Loop<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count));
+            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count));
         }
-        public static IEnumerable<TElement> Loop<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token, IProgress<Double> subProgress)
+        public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token, IProgress<Double> subProgress)
         {
-            return progress.Loop<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count, subProgress));
+            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count, subProgress));
         }
-        private static IEnumerable<TElement> Loop<TEnumerable, TElement>(this Progress progress, TEnumerable elements, CancellationToken token, Func<Progress, TEnumerable, Reporter> create)
+        private static IEnumerable<TElement> Enumerate<TEnumerable, TElement>(this Progress progress, TEnumerable elements, CancellationToken token, Func<Progress, TEnumerable, Reporter> create)
             where TEnumerable : IEnumerable<TElement>
         {
             token.ThrowIfCancellationRequested();
