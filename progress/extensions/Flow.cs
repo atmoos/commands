@@ -32,11 +32,12 @@ namespace progress.extensions
         public static async IAsyncEnumerable<TimeSpan> AtIntervalls(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
         {
             using(Reporter reporter = progress.Setup(duration)) {
-                await using(var enumerator = new TimerStream(interval).GetAsyncEnumerator(token))
+                await using(var enumerator = new TimerStream(interval).GetAsyncEnumerator(token)) {
                     while(await enumerator.MoveNextAsync() && enumerator.Current < duration) {
                         reporter.Report();
                         yield return enumerator.Current;
                     }
+                }
             }
         }
 
