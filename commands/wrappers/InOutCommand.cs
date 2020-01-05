@@ -1,9 +1,8 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using progress;
 
-namespace commands.wrappers
+namespace commands.commands
 {
     internal sealed class InOutCommand<TArgument, TResult> : ICommand, IResult<TResult>
     {

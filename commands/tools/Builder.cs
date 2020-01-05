@@ -1,16 +1,12 @@
 using System.Collections.Generic;
-using commands.wrappers;
+using commands.commands;
 
 namespace commands.tools
 {
     public abstract class Builder : IBuilder, IGenerator
     {
         protected readonly List<ICommand> _commands;
-
-        internal Builder(List<ICommand> commands)
-        {
-            _commands = commands;
-        }
+        internal Builder(List<ICommand> commands) => _commands = commands;
         public IBuilder Add(ICommand command)
         {
             _commands.Add(command);
@@ -37,10 +33,7 @@ namespace commands.tools
     public sealed class Builder<TArgument> : Builder, IBuilder<TArgument>
     {
         private readonly IResult<TArgument> _result;
-        internal Builder(List<ICommand> commands, IResult<TArgument> result) : base(commands)
-        {
-            _result = result;
-        }
+        internal Builder(List<ICommand> commands, IResult<TArgument> result) : base(commands) => _result = result;
         public IBuilder Add(ICommandIn<TArgument> command)
         {
             _commands.Add(new InCommand<TArgument>(command, _result));

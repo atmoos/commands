@@ -1,16 +1,14 @@
 ﻿
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using progress;
 
-namespace commands.wrappers
+namespace commands.commands
 {
     internal sealed class InCommand<TArgument> : ICommand
     {
         private readonly IResult<TArgument> _argument;
         private readonly ICommandIn<TArgument> _command;
-
         internal InCommand(ICommandIn<TArgument> command, IResult<TArgument> argument)
         {
             _argument = argument;
