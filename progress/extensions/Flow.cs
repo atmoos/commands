@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -32,15 +31,15 @@ namespace progress.extensions
         public static async IAsyncEnumerable<TimeSpan> AtIntervalls(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
         {
             using(Reporter reporter = progress.Setup(duration)) {
-                await using(var enumerator = new TimerStream(interval).GetAsyncEnumerator(token)) {
-                    while(await enumerator.MoveNextAsync() && enumerator.Current < duration) {
-                        reporter.Report();
-                        yield return enumerator.Current;
+                await foreach(var timeStamp in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {
+                    if(timeStamp > duration) {
+                        break;
                     }
+                    reporter.Report();
+                    yield return timeStamp;
                 }
             }
         }
-
         public static async IAsyncEnumerable<TProgress> Approach<TProgress>(this Progress progress, TProgress target, INonLinearProgress<TProgress> nonLinearProgress, [EnumeratorCancellation]CancellationToken token, TimeSpan interval)
         {
             var linearTarget = nonLinearProgress.Linearize(target);
@@ -48,16 +47,17 @@ namespace progress.extensions
             using(Reporter reporter = progress.Setup(target, view)) {
                 Double delta = 0;
                 var prevDelta = Double.PositiveInfinity;
-                while((delta = Math.Abs(linearTarget - view.LinearProgress)) < prevDelta) {
+                await foreach(var _ in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {
+                    if((delta = Math.Abs(linearTarget - view.LinearProgress)) >= prevDelta) {
+                        break;
+                    }
                     yield return view.Current;
-                    await Task.Delay(interval, token).ConfigureAwait(false);
                     reporter.Report();
                     prevDelta = delta;
                 }
                 yield return view.Current;
             }
         }
-
         private sealed class NonLinearView<TProgress> : INonLinearProgress<TProgress>
         {
             private Double _linearProgress;
@@ -73,24 +73,6 @@ namespace progress.extensions
             }
             public Double Linearize(TProgress progress) => (_linearProgress = _nlProgress.Linearize(progress));
             public TProgress Progress() => (_current = _nlProgress.Progress());
-        }
-    }
-
-    internal class Flow<TProgress> : IProgress<TProgress>, IEnumerable<TProgress>
-    {
-        public IEnumerator<TProgress> GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Report(TProgress value)
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            throw new NotImplementedException();
         }
     }
 }

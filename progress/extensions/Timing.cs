@@ -6,6 +6,30 @@ using System.Collections.Generic;
 
 namespace progress.extensions
 {
+    public sealed class Interval : IAsyncEnumerable<TimeSpan>
+    {
+        private readonly Int32 _intervalls;
+        private readonly TimerStream _stream;
+        public Interval(TimeSpan duration, Int32 intervalls)
+            : this(intervalls, TimeSpan.FromTicks(duration.Ticks / intervalls))
+        {
+        }
+        public Interval(Int32 count, TimeSpan interval)
+        {
+            _intervalls = count;
+            _stream = new TimerStream(interval);
+        }
+        public async IAsyncEnumerator<TimeSpan> GetAsyncEnumerator(CancellationToken cancellationToken = default)
+        {
+            Int32 interval = -1;
+            await foreach(TimeSpan timeStamp in _stream.WithCancellation(cancellationToken).ConfigureAwait(false)) {
+                yield return timeStamp;
+                if(interval++ > _intervalls) {
+                    break;
+                }
+            }
+        }
+    }
     public sealed class TimerStream : IAsyncEnumerable<TimeSpan>
     {
         private readonly Int64 _interval;

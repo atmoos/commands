@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using progress.extensions;
-using System.Diagnostics;
 
 namespace progressTest.extensions
 {
