@@ -135,7 +135,7 @@ namespace progressTest
         public void AdvanceIsStrictlyMonotonic() => _harness.AdvanceIsStrictlyMonotonic();
         [Fact]
         public void AdvanceIsLinear() => _harness.AdvanceIsLinear();
-        Double INonLinearProgress<Decimal>.Linearize(Decimal progress) => Math.Sqrt((Double)progress);
+        Double INonLinearProgress<Decimal>.Linearise(Decimal progress) => Math.Sqrt((Double)progress);
         Decimal INonLinearProgress<Decimal>.Progress()
         {
             _time += _timeStep;

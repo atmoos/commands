@@ -3,8 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using progress;
 using Xunit;
-using System.Diagnostics;
-using System.Threading;
 
 namespace progressTest
 {

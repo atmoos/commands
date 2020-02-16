@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using Xunit;
 using progress;
-using progress.reporters;
 
 namespace progressTest
 {

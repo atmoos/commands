@@ -42,7 +42,7 @@ namespace progress.extensions
         }
         public static async IAsyncEnumerable<TProgress> Approach<TProgress>(this Progress progress, TProgress target, INonLinearProgress<TProgress> nonLinearProgress, [EnumeratorCancellation]CancellationToken token, TimeSpan interval)
         {
-            var linearTarget = nonLinearProgress.Linearize(target);
+            var linearTarget = nonLinearProgress.Linearise(target);
             var view = new NonLinearView<TProgress>(nonLinearProgress);
             using(Reporter reporter = progress.Setup(target, view)) {
                 Double delta = 0;
@@ -71,7 +71,7 @@ namespace progress.extensions
                 _linearProgress = 0;
                 _nlProgress = nlProgress;
             }
-            public Double Linearize(TProgress progress) => (_linearProgress = _nlProgress.Linearize(progress));
+            public Double Linearise(TProgress progress) => (_linearProgress = _nlProgress.Linearise(progress));
             public TProgress Progress() => (_current = _nlProgress.Progress());
         }
     }
