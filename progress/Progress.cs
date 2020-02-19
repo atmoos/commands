@@ -15,12 +15,8 @@ namespace progress
         public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress) => Chain(ProgressDriver.Create(target, nlProgress));
         public Reporter Setup<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(target, nlProgress), subProgress);
         public static Progress Create(IProgress<Double> progress) => new Progress(MonotonicProgress.Strictly.Increasing(progress));
-        private Reporter Chain(ProgressDriver driver) => Make(driver, _stack.Peek());
-        private Reporter Branch(ProgressDriver driver, IProgress<Double> subProgress) => Make(driver, MonotonicProgress.Strictly.Increasing(new ProgressZip<Double>(subProgress, _stack.Peek())));
-        private Reporter Make(ProgressDriver driver, IProgress<Double> progress)
-        {
-            var adapter = new DriverAdapter(driver, _stack, progress);
-            return new Reporter(driver, adapter, adapter);
-        }
+        private Reporter Chain(ProgressDriver driver) => Reporter(driver, _stack.Peek());
+        private Reporter Branch(ProgressDriver driver, IProgress<Double> progress) => Reporter(driver, new ProgressZip<Double>(_stack.Peek(), MonotonicProgress.Strictly.Increasing(progress)));
+        private Reporter Reporter(ProgressDriver driver, IProgress<Double> progress) => new Reporter(driver, progress, new DriverAdapter(_stack, driver, progress));
     }
 }
