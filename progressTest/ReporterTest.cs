@@ -4,19 +4,21 @@ using System.Collections.Generic;
 using Xunit;
 using progress;
 
+using Stack = progress.Stack<progress.Reporter>;
+
 namespace progressTest
 {
     public sealed class ReporterTest
     {
         private const Int32 STEPS = 2;
-        private readonly Reset _reset;
+        private readonly Stack _stack;
         private readonly Reporter _reporter;
         private readonly ProgressRecorder<Double> _progress;
         public ReporterTest()
         {
-            _reset = new Reset();
             _progress = new ProgressRecorder<Double>();
-            _reporter = new Reporter(ProgressDriver.Create(STEPS), _progress, _reset);
+            _stack = Reporter.Root(_progress);
+            _reporter = new Reporter(_stack, ProgressDriver.Create(STEPS), _progress);
         }
         [Fact]
         public void ZeroIsReportedUponCreation()
@@ -27,20 +29,20 @@ namespace progressTest
         public void OneIsReportedUponDisposal()
         {
             _reporter.Dispose();
-            Assert.Equal(1d, _progress.Last());
+            Assert.Contains(1d, _progress);
         }
         [Fact]
         public void ResetIsPerformedUponDisposal()
         {
             _reporter.Dispose();
-            Assert.True(_reset.Disposed, "Reset action must be called!");
+            Assert.NotEqual(_stack.Peek(), _reporter);
         }
         [Fact]
         public void ReportAdvancesProgress()
         {
             const Int32 steps = 4;
             var progress = new ProgressRecorder<Double>();
-            using(var reporter = new Reporter(ProgressDriver.Create(steps), progress, _reset)) {
+            using(var reporter = new Reporter(_stack, ProgressDriver.Create(steps), progress)) {
                 foreach(var _ in Enumerable.Range(0, steps)) {
                     reporter.Report();
                 }
@@ -85,11 +87,6 @@ namespace progressTest
                     yield return value;
                 }
             }
-        }
-        private sealed class Reset : IDisposable
-        {
-            public Boolean Disposed { get; private set; } = false;
-            public void Dispose() => Disposed = true;
         }
     }
 }
