@@ -6,7 +6,6 @@ namespace progress
 {
     internal abstract class ProgressDriver
     {
-        public static ProgressDriver Empty { get; } = new EmptyDriver();
         private ProgressDriver() { }
         public abstract Double Advance();
         public abstract Double Accumulate(Double childProgress);
@@ -67,11 +66,6 @@ namespace progress
                 return delta / _range;
             }
             public override Double Accumulate(Double childProgress) => (_currentDelta + _stepSize * childProgress) / _range;
-        }
-        private sealed class EmptyDriver : ProgressDriver
-        {
-            public override Double Accumulate(Double childProgress) => childProgress;
-            public override Double Advance() => 0;
         }
     }
     public sealed class NlProgressAdapter<TProgress> : INonLinearProgress<TProgress>

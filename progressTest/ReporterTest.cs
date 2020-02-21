@@ -47,7 +47,7 @@ namespace progressTest
                     reporter.Report();
                 }
             }
-            Assert.Equal(Enumerable.Range(0, steps + 1).Select(v => ((Double)v) / steps).Append(1d), progress);
+            Assert.Equal(Enumerable.Range(0, steps + 1).Select(v => ((Double)v) / steps), progress);
         }
         [Fact]
         public void ExportedProgressIsScaled()

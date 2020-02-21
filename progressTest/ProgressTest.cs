@@ -47,7 +47,6 @@ namespace progressTest
             Assert.Equal(ExpectedProgress(childIterations * parentIterations), _actualProgress);
         }
         [Fact]
-        [Trait("Failing test", "Failure as reporting implementation is not complete.")]
         public void NotReportingAnythingWithinUsingStatementsReportsSetupBoundaries()
         {
             List<Double> expected = new List<Double>();
@@ -78,7 +77,6 @@ namespace progressTest
                 reporter.Report(); // 1/4
                 Recursive(_progressReporter, 2, 4); // [1/4 ... 2/4]
                 reporter.Report(); // 3/4
-                reporter.Report(); // 4/4
             }
             var head = new[] { 0d, 0.25d };
             var tail = new[] { 0.5d, 0.75d, 1d };
