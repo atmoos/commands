@@ -41,13 +41,12 @@ namespace progressTest
                             childReport.Report();
                         }
                     }
-                    parentReport.Report();
                 }
             }
             Assert.Equal(ExpectedProgress(childIterations), childProgress[0]);
             Assert.Equal(ExpectedProgress(childIterations * parentIterations), _actualProgress);
         }
-        //[Fact]
+        [Fact]
         [Trait("Failing test", "Failure as reporting implementation is not complete.")]
         public void NotReportingAnythingWithinUsingStatementsReportsSetupBoundaries()
         {
@@ -59,9 +58,10 @@ namespace progressTest
                 expected.Add(1d / 4);
                 using(_progressReporter.Setup(2)) {
                     using(_progressReporter.Setup(6)) { }
+                    expected.Add(3d / 8);
                     using(_progressReporter.Setup(8)) { }
+                    expected.Add(2d / 4);
                 }
-                expected.Add(2d / 4);
                 using(_progressReporter.Setup(5)) {
                 }
                 expected.Add(3d / 4);
@@ -77,7 +77,6 @@ namespace progressTest
             using(var reporter = _progressReporter.Setup(4)) {
                 reporter.Report(); // 1/4
                 Recursive(_progressReporter, 2, 4); // [1/4 ... 2/4]
-                reporter.Report(); // 2/4
                 reporter.Report(); // 3/4
                 reporter.Report(); // 4/4
             }
@@ -97,25 +96,23 @@ namespace progressTest
         }
         private static void Recursive(Progress progressReporter, params Int32[] depthAndWidth)
         {
-            void Recurse(Progress progress, Queue<Int32> tree)
+            void Expand(Progress progress, Queue<Int32> tree)
             {
-                if(!tree.TryDequeue(out Int32 steps)) {
+                if(!tree.TryDequeue(out Int32 depth)) {
                     return;
                 }
-                Int32 usings = steps % 3 + 1;
-                using(Reporter r0 = progress.Setup(usings)) {
-                    foreach(var use in Enumerable.Range(0, usings)) {
-                        using(var r1 = progress.Setup(steps)) {
-                            foreach(var step in Enumerable.Range(0, steps)) {
-                                Recurse(progress, tree);
-                                r1.Report();
+                Int32 width = depth % 3 + 1;
+                using(progress.Setup(width)) {
+                    foreach(var use in Enumerable.Range(0, width)) {
+                        using(progress.Setup(depth)) {
+                            foreach(var step in Enumerable.Range(0, depth)) {
+                                Expand(progress, tree);
                             }
                         }
-                        r0.Report();
                     }
                 }
             }
-            Recurse(progressReporter, new Queue<Int32>(depthAndWidth));
+            Expand(progressReporter, new Queue<Int32>(depthAndWidth));
         }
         private List<Double> ExpectedProgress(Int32 iterations) => Enumerable.Range(0, iterations + 1).Select(i => ((Double)i) / iterations).ToList();
     }

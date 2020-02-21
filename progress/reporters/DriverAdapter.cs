@@ -23,7 +23,11 @@ namespace progress.reporters
             _parent = stack.Push(this);
         }
         public void Report(Double value) => _progress.Report(_driver.Accumulate(value));
-        public void Dispose() => _stack.Push(_parent);
+        public void Dispose()
+        {
+            _parent._driver.Advance();
+            _stack.Push(_parent);
+        }
         public static Stack<DriverAdapter> Root(IProgress<Double> root) => new DriverAdapter(root)._stack;
     }
 }
