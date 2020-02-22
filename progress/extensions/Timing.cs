@@ -36,7 +36,7 @@ namespace progress.extensions
         public TimerStream(TimeSpan interval)
         {
             if(interval <= TimeSpan.Zero) {
-                throw new ArgumentOutOfRangeException($"Interval must be in the half open interval of ]0, ∞[. Revceived: {interval:g}");
+                throw new ArgumentOutOfRangeException($"Interval must be in the half open interval of ]0, ∞[. Received: {interval:g}");
             }
             _interval = interval.Ticks;
         }
@@ -44,13 +44,13 @@ namespace progress.extensions
         {
             const Int64 constantTimeIncrement = 1;
             Stopwatch timer = Stopwatch.StartNew();
-            TimeSpan jiterFreeRelativeTime = TimeSpan.Zero;
+            TimeSpan jitterFreeRelativeTime = TimeSpan.Zero;
             while(true) {
-                yield return jiterFreeRelativeTime;
-                Int64 delta = Math.Max(timer.Elapsed.Ticks - jiterFreeRelativeTime.Ticks, 0);
+                yield return jitterFreeRelativeTime;
+                Int64 delta = Math.Max(timer.Elapsed.Ticks - jitterFreeRelativeTime.Ticks, 0);
                 Int64 relativeTimeIncrement = delta / _interval + constantTimeIncrement;
-                jiterFreeRelativeTime += TimeSpan.FromTicks(relativeTimeIncrement * _interval);
-                await Task.Delay(jiterFreeRelativeTime - timer.Elapsed, cancellationToken).ConfigureAwait(false);
+                jitterFreeRelativeTime += TimeSpan.FromTicks(relativeTimeIncrement * _interval);
+                await Task.Delay(jitterFreeRelativeTime - timer.Elapsed, cancellationToken).ConfigureAwait(false);
             }
         }
     }
