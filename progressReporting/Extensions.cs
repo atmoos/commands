@@ -18,6 +18,16 @@ namespace progressReporting
         {
             return progress.Zip(new ObservableProgress<TProgress>(observer));
         }
+        public static IBoundedProgressBuilder<TProgress> Bounded<TProgress>(this IProgress<TProgress> progress, Range<TProgress> range)
+            where TProgress : IComparable<TProgress>
+        {
+            return new BoundedProgressBuilder<TProgress>(progress, range);
+        }
+        public static IBoundedProgressBuilder<TProgress> Bounded<TProgress>(this IProgress<TProgress> progress, TProgress lower, TProgress upper)
+            where TProgress : IComparable<TProgress>
+        {
+            return new BoundedProgressBuilder<TProgress>(progress, new Range<TProgress>(lower, upper));
+        }
         public static IMonotonicBuilder<Double> Monotonic(this IProgress<Double> progress) => new MonotonicBuilder(progress);
         public static IMonotonicBuilder<TProgress> Monotonic<TProgress>(this IProgress<TProgress> progress, TProgress origin = default)
             where TProgress : IComparable<TProgress>

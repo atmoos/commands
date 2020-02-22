@@ -57,7 +57,7 @@ namespace progressReporting
         }
     }
     internal sealed class MonotonicBuilder<TProgress> : IMonotonicBuilder<TProgress>
-            where TProgress : IComparable<TProgress>
+        where TProgress : IComparable<TProgress>
     {
         private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
         internal MonotonicBuilder(IProgress<TProgress> progress, TProgress origin) => _seed = (progress, origin);

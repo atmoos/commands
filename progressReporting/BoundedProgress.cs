@@ -2,42 +2,55 @@ using System;
 
 namespace progressReporting
 {
-    public sealed class BoundedProgress : IProgress<Double>
+    public readonly struct Range<TProgress>
+        where TProgress : IComparable<TProgress>
     {
-        private readonly Double _lower;
-        private readonly Double _upper;
-        private readonly IProgress<Double> _progress;
-        private readonly Func<BoundedProgress, Double, Boolean> _withinBounds;
-        private BoundedProgress(IProgress<Double> progress, Double lower, Double upper, Func<BoundedProgress, Double, Boolean> withinBounds)
+        public TProgress Lower { get; }
+        public TProgress Upper { get; }
+        public Range(in TProgress lower, in TProgress upper)
         {
-            _lower = lower;
-            _upper = upper;
-            _progress = progress;
-            _withinBounds = withinBounds;
-        }
-        public void Report(Double value)
-        {
-            if(_withinBounds(this, value)) {
-                _progress.Report(value);
-            }
-        }
-        public static BoundedProgress Inclusive(IProgress<Double> progress, Double lower, Double upper)
-        {
-            GuardRange(lower, upper);
-            return new BoundedProgress(progress, lower, upper, Inclusive);
-        }
-        public static BoundedProgress Exclusive(IProgress<Double> progress, Double lower, Double upper)
-        {
-            GuardRange(lower, upper);
-            return new BoundedProgress(progress, lower, upper, Exclusive);
-        }
-        private static void GuardRange(Double lower, Double upper)
-        {
-            if(lower >= upper) {
+            if(lower.CompareTo(upper) >= 0) {
                 throw new ArgumentException($"The range [({nameof(lower)}={lower:g3}), ({nameof(upper)}={upper:g3})] is empty.");
             }
+            (Lower, Upper) = (lower, upper);
         }
-        private static Boolean Exclusive(BoundedProgress p, Double value) => p._lower < value && value < p._upper;
-        private static Boolean Inclusive(BoundedProgress p, Double value) => p._lower <= value && value <= p._upper;
+        internal Boolean Inclusive(in TProgress value) => Lower.CompareTo(value) <= 0 && value.CompareTo(Upper) <= 0;
+        internal Boolean Exclusive(in TProgress value) => Lower.CompareTo(value) < 0 && value.CompareTo(Upper) < 0;
+    }
+    public interface IBoundedProgressBuilder<in TProgress>
+    {
+        IProgress<TProgress> Inclusive();
+        IProgress<TProgress> Exclusive();
+    }
+    internal sealed class BoundedProgressBuilder<TProgress> : IBoundedProgressBuilder<TProgress>
+        where TProgress : IComparable<TProgress>
+    {
+        private readonly Range<TProgress> _range;
+        private readonly IProgress<TProgress> _progress;
+        public BoundedProgressBuilder(IProgress<TProgress> progress, in Range<TProgress> range)
+        {
+            _range = range;
+            _progress = progress;
+        }
+        public IProgress<TProgress> Inclusive() => new BoundedProgress(_progress, _range, (r, v) => r.Inclusive(v));
+        public IProgress<TProgress> Exclusive() => new BoundedProgress(_progress, _range, (r, v) => r.Exclusive(v));
+        private sealed class BoundedProgress : IProgress<TProgress>
+        {
+            private readonly Range<TProgress> _range;
+            private readonly IProgress<TProgress> _progress;
+            private readonly Func<Range<TProgress>, TProgress, Boolean> _withinBounds;
+            public BoundedProgress(IProgress<TProgress> progress, in Range<TProgress> range, Func<Range<TProgress>, TProgress, Boolean> withinBounds)
+            {
+                _range = range;
+                _progress = progress;
+                _withinBounds = withinBounds;
+            }
+            public void Report(TProgress value)
+            {
+                if(_withinBounds(_range, value)) {
+                    _progress.Report(value);
+                }
+            }
+        }
     }
 }
