@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace progress.reporters
+namespace progressReporting
 {
     internal sealed class CancellationAdapter<TProgress> : IProgress<TProgress>
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace progress.reporters
+namespace progressReporting
 {
     public interface IProgressView<TProgress> : IProgress<TProgress>
     {

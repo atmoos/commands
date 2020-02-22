@@ -1,8 +1,9 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using progress;
 using Xunit;
+using progress;
+using progressReporting;
 
 using static progressTest.Convenience;
 

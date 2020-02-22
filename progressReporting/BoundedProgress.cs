@@ -1,6 +1,6 @@
 using System;
 
-namespace progress.reporters
+namespace progressReporting
 {
     public sealed class BoundedProgress : IProgress<Double>
     {

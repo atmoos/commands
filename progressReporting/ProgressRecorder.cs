@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace progressTest
+namespace progressReporting
 {
     public sealed class ProgressRecorder<TProgress> : IProgress<TProgress>, IEnumerable<TProgress>
     {

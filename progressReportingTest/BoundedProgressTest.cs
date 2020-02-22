@@ -1,8 +1,8 @@
 using System;
 using Xunit;
-using progress.reporters;
+using progressReporting;
 
-namespace progressTest.reporters
+namespace progressReportingTest
 {
     public sealed class BoundedProgressTest
     {

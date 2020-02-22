@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Xunit;
 using progress;
+using progressReporting;
 
 using Stack = progress.Stack<progress.Reporter>;
 

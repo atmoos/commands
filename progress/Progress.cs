@@ -1,11 +1,13 @@
 using System;
-using progress.reporters;
+using progressReporting;
+
+using static progressReporting.Extensions;
 
 namespace progress
 {
     public sealed class Progress
     {
-        public static Progress Empty { get; } = new Progress(EmptyProgress<Double>.Empty);
+        public static Progress Empty { get; } = new Progress(Empty<Double>());
         private readonly Stack<Reporter> _stack;
         private Progress(IProgress<Double> root) => _stack = Reporter.Root(root);
         public Reporter Setup(Int32 iterations) => Chain(ProgressDriver.Create(iterations));

@@ -1,8 +1,8 @@
 using System;
 
-namespace progress.reporters
+namespace progressReporting
 {
-    public sealed class ProgressZip<TProgress> : IProgress<TProgress>
+    internal sealed class ProgressZip<TProgress> : IProgress<TProgress>
     {
         private readonly IProgress<TProgress> _first;
         private readonly IProgress<TProgress> _second;

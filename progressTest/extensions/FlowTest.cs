@@ -2,8 +2,8 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
+using progressReporting;
 using progress;
 
 using static progress.extensions.Flow;

@@ -1,5 +1,6 @@
 using System;
-using progress.reporters;
+using progressReporting;
+using progress.reporting;
 
 namespace progress
 {
