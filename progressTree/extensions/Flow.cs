@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace progress.extensions
+namespace progressTree.extensions
 {
     public static class Flow
     {

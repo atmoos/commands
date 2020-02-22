@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 using progressReporting;
-using progress;
+using progressTree;
 
-using static progress.extensions.Flow;
+using static progressTree.extensions.Flow;
 
 
-namespace progressTest.extensions
+namespace progressTreeTest.extensions
 {
     public sealed class FlowTest
     {

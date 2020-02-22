@@ -8,7 +8,7 @@ using commands.commands;
 using commandsTest.commands;
 
 using static commands.extensions.Builder;
-using progress;
+using progressTree;
 
 namespace commandsTest
 {

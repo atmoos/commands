@@ -1,8 +1,8 @@
 using System;
 using progressReporting;
-using progress.reporting;
+using progressTree.reporting;
 
-namespace progress
+namespace progressTree
 {
     public sealed class Reporter : IDisposable
     {

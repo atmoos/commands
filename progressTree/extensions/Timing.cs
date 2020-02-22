@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace progress.extensions
+namespace progressTree.extensions
 {
     public sealed class Interval : IAsyncEnumerable<TimeSpan>
     {

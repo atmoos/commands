@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
-using progress.extensions;
+using progressTree.extensions;
 
-namespace progressTest.extensions
+namespace progressTreeTest.extensions
 {
     public sealed class TimerStreamTest
     {

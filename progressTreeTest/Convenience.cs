@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using progress;
+using progressTree;
 
 using static System.Linq.Enumerable;
 
-namespace progressTest
+namespace progressTreeTest
 {
     public static class Convenience
     {

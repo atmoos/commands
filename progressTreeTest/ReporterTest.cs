@@ -2,14 +2,14 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Xunit;
-using progress;
+using progressTree;
 using progressReporting;
 
-using Stack = progress.Stack<progress.Reporter>;
+using Stack = progressTree.Stack<progressTree.Reporter>;
 
-using static progressTest.Convenience;
+using static progressTreeTest.Convenience;
 
-namespace progressTest
+namespace progressTreeTest
 {
     public sealed class ReporterTest
     {

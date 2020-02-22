@@ -1,6 +1,6 @@
 using System;
 
-namespace progress
+namespace progressTree
 {
     public interface INonLinearProgress<TProgress>
     {

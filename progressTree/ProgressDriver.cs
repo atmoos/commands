@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using System.Diagnostics;
 
-namespace progress
+namespace progressTree
 {
     internal abstract class ProgressDriver
     {

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using progress;
+using progressTree;
 
-namespace progressTest
+namespace progressTreeTest
 {
     public interface IDriverTest
     {

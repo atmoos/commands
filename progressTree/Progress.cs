@@ -3,7 +3,7 @@ using progressReporting;
 
 using static progressReporting.Extensions;
 
-namespace progress
+namespace progressTree
 {
     public sealed class Progress
     {

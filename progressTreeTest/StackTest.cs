@@ -1,8 +1,8 @@
 using System;
 using Xunit;
-using progress;
+using progressTree;
 
-namespace progressTest
+namespace progressTreeTest
 {
     public sealed class StackTest
     {

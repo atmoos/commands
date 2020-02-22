@@ -1,6 +1,6 @@
 using System.Threading;
 
-namespace progress
+namespace progressTree
 {
     internal sealed class Stack<TElement>
         where TElement : class

@@ -2,12 +2,12 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Xunit;
-using progress;
+using progressTree;
 using progressReporting;
 
-using static progressTest.Convenience;
+using static progressTreeTest.Convenience;
 
-namespace progressTest
+namespace progressTreeTest
 {
     public class ProgressTest
     {
