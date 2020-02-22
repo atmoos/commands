@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\progress\progress.csproj" />
+    <ProjectReference Include="..\progressTree\progressTree.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
