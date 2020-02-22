@@ -3,56 +3,101 @@ using System.Threading;
 
 namespace progressReporting
 {
-    public interface IMonotonicFactory<out TMonotonic, TProgress>
-        where TMonotonic : IProgress<TProgress>
+    public interface IMonotonicFactory<in TProgress>
     {
-        TMonotonic Increasing(IProgress<TProgress> progress);
-        TMonotonic Decreasing(IProgress<TProgress> progress);
+        IProgress<TProgress> Increasing();
+        IProgress<TProgress> Decreasing();
     }
-    public sealed class MonotonicProgress : IProgress<Double>
+    public interface IMonotonicBuilder<in TProgress> : IMonotonicFactory<TProgress>
     {
-        private Double _current;
+        IMonotonicFactory<TProgress> Strictly { get; }
+    }
+    internal sealed class MonotonicBuilder : IMonotonicBuilder<Double>
+    {
         private readonly IProgress<Double> _progress;
-        private readonly Func<Double, Double, Boolean> _match;
-        private MonotonicProgress(IProgress<Double> progress, Func<Double, Double, Boolean> match, Double init)
+        internal MonotonicBuilder(IProgress<Double> progress) => _progress = progress;
+        public IProgress<Double> Decreasing() => Monotonic.Decreasing(_progress);
+        public IProgress<Double> Increasing() => Monotonic.Increasing(_progress);
+        public IMonotonicFactory<Double> Strictly => new Strict(_progress);
+        private sealed class Monotonic : IMonotonicFactory<Double>
         {
-            _progress = progress;
-            _match = match;
-            _current = init;
+            private readonly IProgress<Double> _progress;
+            internal Monotonic(IProgress<Double> progress) => _progress = progress;
+            public IProgress<Double> Increasing() => Increasing(_progress);
+            public IProgress<Double> Decreasing() => Decreasing(_progress);
+            public static IProgress<Double> Increasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c <= v, Double.NegativeInfinity);
+            public static IProgress<Double> Decreasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c >= v, Double.PositiveInfinity);
         }
-        public void Report(Double value)
+        private sealed class Strict : IMonotonicFactory<Double>
         {
-            if(_match(_current, value)) {
-                Interlocked.Exchange(ref _current, value);
-                _progress.Report(value);
+            private readonly IProgress<Double> _progress;
+            internal Strict(IProgress<Double> progress) => _progress = progress;
+            public IProgress<Double> Increasing() => new MonotonicProgress(_progress, (c, v) => c < v, Double.NegativeInfinity);
+            public IProgress<Double> Decreasing() => new MonotonicProgress(_progress, (c, v) => c > v, Double.PositiveInfinity);
+        }
+        private sealed class MonotonicProgress : IProgress<Double>
+        {
+            private Double _current;
+            private readonly IProgress<Double> _progress;
+            private readonly Func<Double, Double, Boolean> _match;
+            public MonotonicProgress(IProgress<Double> progress, Func<Double, Double, Boolean> match, Double init)
+            {
+                _progress = progress;
+                _match = match;
+                _current = init;
             }
-        }
-        public static IMonotonicFactory<MonotonicProgress, Double> Strictly { get; } = new Strict();
-        public static MonotonicProgress Increasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c <= v, Double.NegativeInfinity);
-        public static MonotonicProgress Decreasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c >= v, Double.PositiveInfinity);
-        private sealed class Strict : IMonotonicFactory<MonotonicProgress, Double>
-        {
-            public MonotonicProgress Increasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c < v, Double.NegativeInfinity);
-            public MonotonicProgress Decreasing(IProgress<Double> progress) => new MonotonicProgress(progress, (c, v) => c > v, Double.PositiveInfinity);
+            public void Report(Double value)
+            {
+                if(_match(_current, value)) {
+                    Interlocked.Exchange(ref _current, value);
+                    _progress.Report(value);
+                }
+            }
+
         }
     }
-    public sealed class MonotonicProgress<TProgress> : IProgress<TProgress>
-        where TProgress : class, IComparable<TProgress>
+    internal sealed class MonotonicBuilder<TProgress> : IMonotonicBuilder<TProgress>
+            where TProgress : IComparable<TProgress>
     {
-        private TProgress _current;
-        private readonly IProgress<TProgress> _progress;
-        public MonotonicProgress(IProgress<TProgress> progress, TProgress init = default)
+        private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
+        internal MonotonicBuilder(IProgress<TProgress> progress, TProgress origin) => _seed = (progress, origin);
+        public IProgress<TProgress> Decreasing() => Monotonic.Decreasing(_seed.progress, _seed.origin);
+        public IProgress<TProgress> Increasing() => Monotonic.Increasing(_seed.progress, _seed.origin);
+        public IMonotonicFactory<TProgress> Strictly => new Strict(_seed);
+        private sealed class Monotonic : IMonotonicFactory<TProgress>
         {
-            _progress = progress;
-            _current = init;
+            private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
+            internal Monotonic((IProgress<TProgress>, TProgress) seed) => _seed = seed;
+            public IProgress<TProgress> Increasing() => Increasing(_seed.progress, _seed.origin);
+            public IProgress<TProgress> Decreasing() => Decreasing(_seed.progress, _seed.origin);
+            public static IProgress<TProgress> Increasing(IProgress<TProgress> progress, TProgress origin) => new MonotonicProgress(progress, origin, (c, v) => c.CompareTo(v) <= 0);
+            public static IProgress<TProgress> Decreasing(IProgress<TProgress> progress, TProgress origin) => new MonotonicProgress(progress, origin, (c, v) => c.CompareTo(v) >= 0);
         }
-        public void Report(TProgress value)
+        private sealed class Strict : IMonotonicFactory<TProgress>
         {
-            if(_current.CompareTo(value) > 0) {
-                return;
+            private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
+            internal Strict((IProgress<TProgress>, TProgress) seed) => _seed = seed;
+            public IProgress<TProgress> Increasing() => new MonotonicProgress(_seed.progress, _seed.origin, (c, v) => c.CompareTo(v) < 0);
+            public IProgress<TProgress> Decreasing() => new MonotonicProgress(_seed.progress, _seed.origin, (c, v) => c.CompareTo(v) > 0);
+        }
+        internal sealed class MonotonicProgress : IProgress<TProgress>
+        {
+            private TProgress _current;
+            private readonly IProgress<TProgress> _progress;
+            private readonly Func<TProgress, TProgress, Boolean> _match;
+            public MonotonicProgress(IProgress<TProgress> progress, TProgress init, Func<TProgress, TProgress, Boolean> match)
+            {
+                _progress = progress;
+                _current = init;
+                _match = match;
             }
-            Interlocked.Exchange(ref _current, value);
-            _progress.Report(value);
+            public void Report(TProgress value)
+            {
+                if(_match(_current, value)) {
+                    _current = value;
+                    _progress.Report(value);
+                }
+            }
         }
     }
 }

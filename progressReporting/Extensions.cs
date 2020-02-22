@@ -18,5 +18,11 @@ namespace progressReporting
         {
             return progress.Zip(new ObservableProgress<TProgress>(observer));
         }
+        public static IMonotonicBuilder<Double> Monotonic(this IProgress<Double> progress) => new MonotonicBuilder(progress);
+        public static IMonotonicBuilder<TProgress> Monotonic<TProgress>(this IProgress<TProgress> progress, TProgress origin = default)
+            where TProgress : IComparable<TProgress>
+        {
+            return new MonotonicBuilder<TProgress>(progress, origin);
+        }
     }
 }

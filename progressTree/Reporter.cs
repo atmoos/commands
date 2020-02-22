@@ -34,7 +34,7 @@ namespace progressTree
                 _rootProgress.Report(progress);
             }
         }
-        public IProgress<Double> Export() => MonotonicProgress.Strictly.Increasing(Progress);
+        public IProgress<Double> Export() => Progress.Monotonic().Strictly.Increasing();
         public void Dispose()
         {
             _stack.Push(_parent);
