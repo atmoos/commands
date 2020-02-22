@@ -67,7 +67,7 @@ namespace progressTest.extensions
         {
             const Int32 count = 8;
             const Int32 intervalMs = 20; // values lower than 16ms can cause flaky tests
-            const Int32 extendendIntervalMs = (Int32)(1.6 * intervalMs);
+            const Int32 extendendIntervalMs = (Int32)(1.2 * intervalMs);
             Int32 expectedOverheadFactor = (Int32)Math.Ceiling(extendendIntervalMs / (Decimal)intervalMs);
             Func<Task> workOverhead = () => Task.Delay(extendendIntervalMs);
             var expected = Enumerable.Range(0, count).Select(i => TimeSpan.FromMilliseconds(expectedOverheadFactor * intervalMs * i));

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using progress;
 using Xunit;
 
+using static progressTest.Convenience;
+
 namespace progressTest
 {
     public class ProgressTest
@@ -84,34 +86,5 @@ namespace progressTest
             Assert.Equal(tail, _actualProgress.TakeLast(3));
             Assert.True(_actualProgress.Count() > head.Length + tail.Length, "Sanity check that there is an absurdly long middle range");
         }
-        private static void GenerateProgress(Progress progress, Int32 iterations)
-        {
-            using(Reporter reporter = progress.Setup(iterations)) {
-                foreach(var _ in Enumerable.Range(0, iterations)) {
-                    reporter.Report();
-                }
-            }
-        }
-        private static void Recursive(Progress progressReporter, params Int32[] depthAndWidth)
-        {
-            void Expand(Progress progress, Queue<Int32> tree)
-            {
-                if(!tree.TryDequeue(out Int32 depth)) {
-                    return;
-                }
-                Int32 width = depth % 3 + 1;
-                using(progress.Setup(width)) {
-                    foreach(var use in Enumerable.Range(0, width)) {
-                        using(progress.Setup(depth)) {
-                            foreach(var step in Enumerable.Range(0, depth)) {
-                                Expand(progress, tree);
-                            }
-                        }
-                    }
-                }
-            }
-            Expand(progressReporter, new Queue<Int32>(depthAndWidth));
-        }
-        private List<Double> ExpectedProgress(Int32 iterations) => Enumerable.Range(0, iterations + 1).Select(i => ((Double)i) / iterations).ToList();
     }
 }

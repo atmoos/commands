@@ -6,6 +6,8 @@ using progress;
 
 using Stack = progress.Stack<progress.Reporter>;
 
+using static progressTest.Convenience;
+
 namespace progressTest
 {
     public sealed class ReporterTest
@@ -47,7 +49,20 @@ namespace progressTest
                     reporter.Report();
                 }
             }
-            Assert.Equal(Enumerable.Range(0, steps + 1).Select(v => ((Double)v) / steps), progress);
+            Assert.Equal(ExpectedProgress(steps), progress);
+        }
+        [Fact]
+        public void ReportedProgressStaysWithinBounds()
+        {
+            const Int32 steps = 4;
+            const Int32 overflowFactor = 2;
+            var progress = new ProgressRecorder<Double>();
+            using(var reporter = new Reporter(_stack, ProgressDriver.Create(steps), progress)) {
+                foreach(var _ in Enumerable.Range(0, steps * overflowFactor)) {
+                    reporter.Report();
+                }
+            }
+            Assert.Equal(ExpectedProgress(steps), progress);
         }
         [Fact]
         public void ExportedProgressIsScaled()
@@ -70,13 +85,6 @@ namespace progressTest
             Report(progress, input);
             var expectedTail = MakeStrictlyMonotonic(input.Select(v => scale * (1d + v))).ToList();
             Assert.Equal(expectedTail, _progress.TakeLast(expectedTail.Count));
-        }
-        private static Int32 Report(IProgress<Double> progress, params Double[] range)
-        {
-            foreach(var value in range) {
-                progress.Report(value);
-            }
-            return range.Length;
         }
         private static IEnumerable<Double> MakeStrictlyMonotonic(IEnumerable<Double> range)
         {

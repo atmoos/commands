@@ -26,7 +26,13 @@ namespace progress
             _parent = stack.Push(this);
             Progress = new DriverWrapper(_driver, progress);
         }
-        public void Report() => _rootProgress.Report(_driver.Advance());
+        public void Report()
+        {
+            Double progress = _driver.Advance();
+            if(progress <= 1d) {
+                _rootProgress.Report(progress);
+            }
+        }
         public IProgress<Double> Export() => MonotonicProgress.Strictly.Increasing(Progress);
         public void Dispose()
         {
