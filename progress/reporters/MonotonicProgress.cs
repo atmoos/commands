@@ -37,7 +37,7 @@ namespace progress.reporters
         }
     }
     public sealed class MonotonicProgress<TProgress> : IProgress<TProgress>
-   where TProgress : class, IComparable<TProgress>
+        where TProgress : class, IComparable<TProgress>
     {
         private TProgress _current;
         private readonly IProgress<TProgress> _progress;
