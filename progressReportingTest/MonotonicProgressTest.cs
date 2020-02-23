@@ -47,31 +47,29 @@ namespace progressReportingTest
         }
         public sealed class OnGeneric : IMonotonicTest
         {
-            private static readonly Double NEG_INFINITY = Double.NegativeInfinity;
-            private static readonly Double POS_INFINITY = Double.PositiveInfinity;
             private readonly ProgressRecorder<Double> _actualSequence = new ProgressRecorder<Double>();
             [Fact]
             public void MonotonicIncreasingFiltersSequenceWeaklyIncreasing()
             {
-                RunFilter(_actualSequence.Monotonic<Double>(NEG_INFINITY).Increasing());
+                RunFilter(_actualSequence.Monotonic<Double>().Increasing());
                 Assert(_actualSequence, -1, 0, 0, 0, 1, 2, 3, 3, 4);
             }
             [Fact]
             public void MonotonicStrictlyIncreasingFiltersSequenceStrictlyIncreasing()
             {
-                RunFilter(_actualSequence.Monotonic<Double>(NEG_INFINITY).Strictly.Increasing());
+                RunFilter(_actualSequence.Monotonic<Double>().Strictly.Increasing());
                 Assert(_actualSequence, -1, 0, 1, 2, 3, 4);
             }
             [Fact]
             public void MonotonicDecreasingFiltersSequenceWeaklyDecreasing()
             {
-                RunFilter(_actualSequence.Monotonic<Double>(POS_INFINITY).Decreasing());
+                RunFilter(_actualSequence.Monotonic<Double>().Decreasing());
                 Assert(_actualSequence, -1, -2, -3, -4, -4, -4, -5, -5, -6);
             }
             [Fact]
             public void MonotonicStrictlyDereasingFiltersSequenceStrictlyDecreasing()
             {
-                RunFilter(_actualSequence.Monotonic<Double>(POS_INFINITY).Strictly.Decreasing());
+                RunFilter(_actualSequence.Monotonic<Double>().Strictly.Decreasing());
                 Assert(_actualSequence, -1, -2, -3, -4, -5, -6);
             }
         }

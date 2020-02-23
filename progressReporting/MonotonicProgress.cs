@@ -53,43 +53,42 @@ namespace progressReporting
                     _progress.Report(value);
                 }
             }
-
         }
     }
     internal sealed class MonotonicBuilder<TProgress> : IMonotonicBuilder<TProgress>
         where TProgress : IComparable<TProgress>
     {
-        private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
-        internal MonotonicBuilder(IProgress<TProgress> progress, TProgress origin) => _seed = (progress, origin);
-        public IProgress<TProgress> Decreasing() => Monotonic.Decreasing(_seed.progress, _seed.origin);
-        public IProgress<TProgress> Increasing() => Monotonic.Increasing(_seed.progress, _seed.origin);
-        public IMonotonicFactory<TProgress> Strictly => new Strict(_seed);
+        private readonly IProgress<TProgress> _progress;
+        internal MonotonicBuilder(IProgress<TProgress> progress) => _progress = progress;
+        public IProgress<TProgress> Decreasing() => Monotonic.Decreasing(_progress);
+        public IProgress<TProgress> Increasing() => Monotonic.Increasing(_progress);
+        public IMonotonicFactory<TProgress> Strictly => new Strict(_progress);
         private sealed class Monotonic : IMonotonicFactory<TProgress>
         {
-            private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
-            internal Monotonic((IProgress<TProgress>, TProgress) seed) => _seed = seed;
-            public IProgress<TProgress> Increasing() => Increasing(_seed.progress, _seed.origin);
-            public IProgress<TProgress> Decreasing() => Decreasing(_seed.progress, _seed.origin);
-            public static IProgress<TProgress> Increasing(IProgress<TProgress> progress, TProgress origin) => new MonotonicProgress(progress, origin, (c, v) => c.CompareTo(v) <= 0);
-            public static IProgress<TProgress> Decreasing(IProgress<TProgress> progress, TProgress origin) => new MonotonicProgress(progress, origin, (c, v) => c.CompareTo(v) >= 0);
+            private readonly IProgress<TProgress> _progress;
+            internal Monotonic(IProgress<TProgress> progress) => _progress = progress;
+            public IProgress<TProgress> Increasing() => Increasing(_progress);
+            public IProgress<TProgress> Decreasing() => Decreasing(_progress);
+            public static IProgress<TProgress> Increasing(IProgress<TProgress> progress) => new MonotonicProgress(progress, (c, v) => c.CompareTo(v) <= 0);
+            public static IProgress<TProgress> Decreasing(IProgress<TProgress> progress) => new MonotonicProgress(progress, (c, v) => c.CompareTo(v) >= 0);
         }
         private sealed class Strict : IMonotonicFactory<TProgress>
         {
-            private readonly (IProgress<TProgress> progress, TProgress origin) _seed;
-            internal Strict((IProgress<TProgress>, TProgress) seed) => _seed = seed;
-            public IProgress<TProgress> Increasing() => new MonotonicProgress(_seed.progress, _seed.origin, (c, v) => c.CompareTo(v) < 0);
-            public IProgress<TProgress> Decreasing() => new MonotonicProgress(_seed.progress, _seed.origin, (c, v) => c.CompareTo(v) > 0);
+            private readonly IProgress<TProgress> _progress;
+            internal Strict(IProgress<TProgress> progress) => _progress = progress;
+            public IProgress<TProgress> Increasing() => new MonotonicProgress(_progress, (c, v) => c.CompareTo(v) < 0);
+            public IProgress<TProgress> Decreasing() => new MonotonicProgress(_progress, (c, v) => c.CompareTo(v) > 0);
         }
         internal sealed class MonotonicProgress : IProgress<TProgress>
         {
             private TProgress _current;
             private readonly IProgress<TProgress> _progress;
-            private readonly Func<TProgress, TProgress, Boolean> _match;
-            public MonotonicProgress(IProgress<TProgress> progress, TProgress init, Func<TProgress, TProgress, Boolean> match)
+            private Func<TProgress, TProgress, Boolean> _match;
+            public MonotonicProgress(IProgress<TProgress> progress, Func<TProgress, TProgress, Boolean> match)
             {
                 _progress = progress;
-                _current = init;
-                _match = match;
+                _current = default;
+                _match = (_, __) => { _match = match; return true; };
             }
             public void Report(TProgress value)
             {
