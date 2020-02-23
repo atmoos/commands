@@ -12,7 +12,7 @@ namespace commands.commands
         public MapCommand(Func<TArgument, CancellationToken, TResult> func) => _func = func;
         public async Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, Progress progress)
         {
-            using(progress.Setup(1)) {
+            using(progress.Schedule(1)) {
                 await Task.Yield();
                 return _func(argument, cancellationToken);
             }

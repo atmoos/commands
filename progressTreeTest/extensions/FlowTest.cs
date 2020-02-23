@@ -24,9 +24,9 @@ namespace progressTreeTest.extensions
         {
             const Int32 count = 4;
             var recorder = new ProgressRecorder<Double>();
-            var intervalls = Enumerable.Range(0, count).Select(i => i / (Double)count).ToList();
-            Progress.Create(recorder).Enumerate(intervalls, CancellationToken.None).ToList();
-            var expected = intervalls.Append(1);
+            var intervals = Enumerable.Range(0, count).Select(i => i / (Double)count).ToList();
+            Progress.Create(recorder).Enumerate(intervals, CancellationToken.None).ToList();
+            var expected = intervals.Append(1);
             Assert.Equal(expected, recorder);
         }
         [Fact]

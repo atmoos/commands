@@ -13,7 +13,7 @@ namespace commands.commands
         public SourceCommand(Func<CancellationToken, TResult> source) => _source = source;
         public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
         {
-            using(progress.Setup(1)) {
+            using(progress.Schedule(1)) {
                 await Task.Yield();
                 return _source(cancellationToken);
             }

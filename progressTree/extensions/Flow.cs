@@ -10,11 +10,11 @@ namespace progressTree.extensions
     {
         public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token)
         {
-            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count));
+            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Schedule(c.Count));
         }
         public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token, IProgress<Double> subProgress)
         {
-            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Setup(c.Count, subProgress));
+            return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Schedule(c.Count, subProgress));
         }
         private static IEnumerable<TElement> Enumerate<TEnumerable, TElement>(this Progress progress, TEnumerable elements, CancellationToken token, Func<Progress, TEnumerable, Reporter> create)
             where TEnumerable : IEnumerable<TElement>
@@ -30,7 +30,7 @@ namespace progressTree.extensions
         }
         public static async IAsyncEnumerable<TimeSpan> AtIntervalls(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
         {
-            using(Reporter reporter = progress.Setup(duration)) {
+            using(Reporter reporter = progress.Schedule(duration)) {
                 await foreach(var timeStamp in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {
                     if(timeStamp > duration) {
                         break;
@@ -44,7 +44,7 @@ namespace progressTree.extensions
         {
             var linearTarget = nonLinearProgress.Linearise(target);
             var view = new NonLinearView<TProgress>(nonLinearProgress);
-            using(Reporter reporter = progress.Setup(target, view)) {
+            using(Reporter reporter = progress.Schedule(target, view)) {
                 Double delta = 0;
                 var prevDelta = Double.PositiveInfinity;
                 await foreach(var _ in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {

@@ -17,7 +17,7 @@ namespace progressTreeTest
         }
         public static void GenerateProgress(Progress progress, Int32 iterations)
         {
-            using(Reporter reporter = progress.Setup(iterations)) {
+            using(Reporter reporter = progress.Schedule(iterations)) {
                 foreach(var _ in Range(0, iterations)) {
                     reporter.Report();
                 }
@@ -31,9 +31,9 @@ namespace progressTreeTest
                     return;
                 }
                 Int32 width = depth % 3 + 1;
-                using(progress.Setup(width)) {
+                using(progress.Schedule(width)) {
                     foreach(var use in Range(0, width)) {
-                        using(progress.Setup(depth)) {
+                        using(progress.Schedule(depth)) {
                             foreach(var step in Enumerable.Range(0, depth)) {
                                 Expand(progress, tree);
                             }

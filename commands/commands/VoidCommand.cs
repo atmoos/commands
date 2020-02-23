@@ -12,7 +12,7 @@ namespace commands.commands
         public VoidCommand(Action<CancellationToken> action) => _action = action;
         public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
-            using(progress.Setup(1)) {
+            using(progress.Schedule(1)) {
                 await Task.Yield();
                 _action(cancellationToken);
             }

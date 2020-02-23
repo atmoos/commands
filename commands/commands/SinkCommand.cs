@@ -13,7 +13,7 @@ namespace commands.commands
         public SinkCommand(Action<TArgument, CancellationToken> sink) => _sink = sink;
         public async Task Execute(TArgument argument, CancellationToken cancellationToken, Progress progress)
         {
-            using(progress.Setup(1)) {
+            using(progress.Schedule(1)) {
                 await Task.Yield();
                 _sink(argument, cancellationToken);
             }

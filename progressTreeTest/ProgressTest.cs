@@ -35,10 +35,10 @@ namespace progressTreeTest
             const Int32 childIterations = 4;
             const Int32 parentIterations = 8;
             var childReports = new List<IEnumerable<Double>>();
-            using(var parentReport = _progressReporter.Setup(parentIterations)) {
+            using(var parentReport = _progressReporter.Schedule(parentIterations)) {
                 for(Int32 p = 0; p < parentIterations; ++p) {
                     var subProgress = new ProgressRecorder<Double>();
-                    using(var childReport = _progressReporter.Setup(childIterations, subProgress)) {
+                    using(var childReport = _progressReporter.Schedule(childIterations, subProgress)) {
                         childReports.Add(subProgress);
                         for(Int32 c = 0; c < childIterations; ++c) {
                             childReport.Report();
@@ -56,20 +56,20 @@ namespace progressTreeTest
         public void ScheduledReportsAreStable()
         {
             List<Double> expected = new List<Double>();
-            using(_progressReporter.Setup(4)) {
+            using(_progressReporter.Schedule(4)) {
                 expected.Add(0);
-                using(var r = _progressReporter.Setup(3)) {
+                using(var r = _progressReporter.Schedule(3)) {
                     r.Report();
                     expected.Add(1d / (3 * 4));
                     // but forget 2/(3*4) etc...
                 }
                 expected.Add(1d / 4); // upon disposal
-                using(_progressReporter.Setup(2)) {
-                    using(_progressReporter.Setup(6)) {
+                using(_progressReporter.Schedule(2)) {
+                    using(_progressReporter.Schedule(6)) {
                         // forget!
                     }
                     expected.Add(3d / 8); // upon disposal
-                    using(var r = _progressReporter.Setup(8)) {
+                    using(var r = _progressReporter.Schedule(8)) {
                         r.Report();
                         expected.Add(3d / 8 + 1d / (8 * 2 * 4));
                         r.Report();
@@ -78,7 +78,7 @@ namespace progressTreeTest
                     }
                     expected.Add(2d / 4); // upon disposal
                 }
-                using(_progressReporter.Setup(5)) {
+                using(_progressReporter.Schedule(5)) {
                     // forget!
                 }
                 expected.Add(3d / 4); // upon disposal
@@ -90,7 +90,7 @@ namespace progressTreeTest
         [Fact]
         public void NestedReportsAreWellBehaved()
         {
-            using(var reporter = _progressReporter.Setup(4)) {
+            using(var reporter = _progressReporter.Schedule(4)) {
                 reporter.Report(); // 1/4
                 Recursive(_progressReporter, 2, 4); // [1/4 ... 2/4]
                 reporter.Report(); // 3/4
