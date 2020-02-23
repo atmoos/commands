@@ -11,7 +11,7 @@ using static progressTreeTest.Convenience;
 
 namespace progressTreeTest
 {
-    public sealed class ReporterTest
+    public sealed class ReporterTest : IExportedProgressTest
     {
         private const Int32 STEPS = 2;
         private readonly Stack _stack;
@@ -77,10 +77,22 @@ namespace progressTreeTest
             Assert.Equal(expectedTail, _progress.TakeLast(count));
         }
         [Fact]
+        public void OutOfBoundExportedProgressIsIgnored()
+        {
+            const Double EXTRA_ZERO = 0;
+            var input = new[] { -1.1, 0, 0.4, 0.1, 1.0, 1.2 };
+            // The extra zero is caused by the initial zero
+            // in the reporters constructor. See ProgressTest
+            // to see that this wont happen in production set-ups.
+            var expected = new[] { EXTRA_ZERO, 0, 0.2, 0.5 };
+            Report(_reporter.Export(), input);
+            Assert.Equal(expected, _progress);
+        }
+        [Fact]
         public void ExportedProgressIsStrictlyMonotonic()
         {
             Double scale = 1d / STEPS;
-            var input = new[] { 0d, 0.25, 0.5, 0.5, 0.75, 1 };
+            var input = new[] { 0d, 0.25, 0.5, 0.4, 0.5, 0.75, 1 };
             IProgress<Double> progress = _reporter.Export();
             _reporter.Report(); // -> 1/STEPS
             Report(progress, input);

@@ -9,7 +9,7 @@ using static progressTreeTest.Convenience;
 
 namespace progressTreeTest
 {
-    public class ProgressTest
+    public class ProgressTest : IExportedProgressTest
     {
         private readonly Progress _progressReporter;
         private readonly ProgressRecorder<Double> _actualProgress;
@@ -100,6 +100,50 @@ namespace progressTreeTest
             Assert.Equal(head, _actualProgress.Take(2));
             Assert.Equal(tail, _actualProgress.TakeLast(3));
             Assert.True(_actualProgress.Count() > head.Length + tail.Length, "Sanity check that there is an absurdly long middle range");
+        }
+        [Fact]
+        public void ExportedProgressIsScaled()
+        {
+            var input = new[] { 0, 0.2, 0.4, 0.6, 1 };
+            var expected = new[] { 0, 0.1, 0.2, 0.3, 0.5, 1 };
+            using(var r = _progressReporter.Schedule(2)) {
+                Report(r.Export(), input);
+            }
+            Assert.Equal(expected, _actualProgress);
+        }
+
+        [Fact]
+        public void ExportedSubProgressIsScaled()
+        {
+            var input = new[] { 0, 0.2, 0.4, 0.8, 1 };
+            var expected = new[] { 0, 0.05, 0.1, 0.2, 0.25, 1 };
+            var actual = new ProgressRecorder<Double>();
+            using(var r = _progressReporter.Schedule(4, actual)) {
+                Report(r.Export(), input);
+            }
+            Assert.Equal(expected, _actualProgress);
+        }
+        [Fact]
+        public void ExportedProgressIsStrictlyMonotonic()
+        {
+            var input = new[] { 0.2, 0, 0.4, 0.3, 0.6, -1 };
+            var expected = new[] { 0, 0.1, 0.2, 0.3, 1 };
+            using(var r = _progressReporter.Schedule(2)) {
+                IProgress<Double> progress = r.Export();
+                Report(progress, input);
+            }
+            Assert.Equal(expected, _actualProgress);
+        }
+        [Fact]
+        public void OutOfBoundExportedProgressIsIgnored()
+        {
+            var input = new[] { -1.1, 0, 0.4, 0.1, 1.0, 1.2, 4.2 };
+            var expected = new[] { 0, 0.2, 0.5, 1 };
+            using(var r = _progressReporter.Schedule(2)) {
+                IProgress<Double> progress = r.Export();
+                Report(progress, input);
+            }
+            Assert.Equal(expected, _actualProgress);
         }
     }
 }
