@@ -30,47 +30,61 @@ namespace progressTreeTest
         }
 
         [Fact]
-        public void ReportsOnChildProgress()
+        public void ReportsOnSubProgressAreNotScaled()
         {
             const Int32 childIterations = 4;
             const Int32 parentIterations = 8;
-            var childProgress = new List<IEnumerable<Double>>();
+            var childReports = new List<IEnumerable<Double>>();
             using(var parentReport = _progressReporter.Setup(parentIterations)) {
                 for(Int32 p = 0; p < parentIterations; ++p) {
                     var subProgress = new ProgressRecorder<Double>();
                     using(var childReport = _progressReporter.Setup(childIterations, subProgress)) {
-                        childProgress.Add(subProgress);
+                        childReports.Add(subProgress);
                         for(Int32 c = 0; c < childIterations; ++c) {
                             childReport.Report();
                         }
                     }
                 }
             }
-            Assert.Equal(ExpectedProgress(childIterations), childProgress[0]);
+            var expectedSubReport = ExpectedProgress(childIterations).ToList();
+            foreach(var subReport in childReports) {
+                Assert.Equal(expectedSubReport, subReport);
+            }
             Assert.Equal(ExpectedProgress(childIterations * parentIterations), _actualProgress);
         }
         [Fact]
-        public void NotReportingAnythingWithinUsingStatementsReportsSetupBoundaries()
+        public void ScheduledReportsAreStable()
         {
             List<Double> expected = new List<Double>();
             using(_progressReporter.Setup(4)) {
                 expected.Add(0);
-                using(_progressReporter.Setup(3)) {
+                using(var r = _progressReporter.Setup(3)) {
+                    r.Report();
+                    expected.Add(1d / (3 * 4));
+                    // but forget 2/(3*4) etc...
                 }
-                expected.Add(1d / 4);
+                expected.Add(1d / 4); // upon disposal
                 using(_progressReporter.Setup(2)) {
-                    using(_progressReporter.Setup(6)) { }
-                    expected.Add(3d / 8);
-                    using(_progressReporter.Setup(8)) { }
-                    expected.Add(2d / 4);
+                    using(_progressReporter.Setup(6)) {
+                        // forget!
+                    }
+                    expected.Add(3d / 8); // upon disposal
+                    using(var r = _progressReporter.Setup(8)) {
+                        r.Report();
+                        expected.Add(3d / 8 + 1d / (8 * 2 * 4));
+                        r.Report();
+                        expected.Add(3d / 8 + 2d / (8 * 2 * 4));
+                        // but forget 3/(8*2*4) etc...
+                    }
+                    expected.Add(2d / 4); // upon disposal
                 }
                 using(_progressReporter.Setup(5)) {
+                    // forget!
                 }
-                expected.Add(3d / 4);
-                // No fourth step
+                expected.Add(3d / 4); // upon disposal
+                // forget reporting 4/4
             }
-            // 4d / 4 is added here, despite no fourth step above
-            expected.Add(4d / 4);
+            expected.Add(4d / 4); // upon disposal
             Assert.Equal(expected, _actualProgress);
         }
         [Fact]

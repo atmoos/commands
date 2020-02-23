@@ -9,7 +9,12 @@ namespace progressTreeTest
 {
     public static class Convenience
     {
-        public static List<Double> ExpectedProgress(Int32 iterations) => Range(0, iterations + 1).Select(i => ((Double)i) / iterations).ToList();
+        public static IEnumerable<Double> ExpectedProgress(Int32 iterations) => ExpectedProgress(iterations, 1d, 0d);
+        public static IEnumerable<Double> ExpectedProgress(Int32 iterations, Double scale, Double offset)
+        {
+            scale /= iterations;
+            return Range(0, iterations + 1).Select(i => scale * i + offset);
+        }
         public static void GenerateProgress(Progress progress, Int32 iterations)
         {
             using(Reporter reporter = progress.Setup(iterations)) {
