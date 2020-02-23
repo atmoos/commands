@@ -86,8 +86,11 @@ namespace progressReporting
             private Func<TProgress, TProgress, Boolean> _match;
             public MonotonicProgress(IProgress<TProgress> progress, Func<TProgress, TProgress, Boolean> match)
             {
+                // The default value will never be used because of the initial match lambda below, that
+                // that does not touch the default value. After the first report, _current will have been
+                // initialised
+                _current = default!;
                 _progress = progress;
-                _current = default;
                 _match = (_, __) => { _match = match; return true; };
             }
             public void Report(TProgress value)

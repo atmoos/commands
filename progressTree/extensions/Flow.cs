@@ -51,8 +51,8 @@ namespace progressTree.extensions
                     if((delta = Math.Abs(linearTarget - view.LinearProgress)) >= prevDelta) {
                         break;
                     }
-                    yield return view.Current;
                     reporter.Report();
+                    yield return view.Current;
                     prevDelta = delta;
                 }
                 yield return view.Current;
@@ -67,7 +67,9 @@ namespace progressTree.extensions
             public TProgress Current => _current;
             public NonLinearView(INonLinearProgress<TProgress> nlProgress)
             {
-                _current = default;
+                // Before current is accessed, it will be set to some value by
+                // a call to Progress() below. Hence, the default will not be used.
+                _current = default!;
                 _linearProgress = 0;
                 _nlProgress = nlProgress;
             }
