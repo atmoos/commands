@@ -28,7 +28,7 @@ namespace progressTree.extensions
                 }
             }
         }
-        public static async IAsyncEnumerable<TimeSpan> AtIntervalls(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
+        public static async IAsyncEnumerable<TimeSpan> AtIntervals(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
         {
             using(Reporter reporter = progress.Schedule(duration)) {
                 await foreach(var timeStamp in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {

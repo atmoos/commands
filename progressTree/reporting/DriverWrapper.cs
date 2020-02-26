@@ -1,4 +1,5 @@
 using System;
+using progressReporting;
 
 namespace progressTree.reporting
 {
@@ -9,7 +10,7 @@ namespace progressTree.reporting
         public DriverWrapper(ProgressDriver driver, IProgress<Double> progress)
         {
             _driver = driver;
-            _progress = progress;
+            _progress = progress.Bounded(0, 1).Inclusive();
         }
         public void Report(Double value) => _progress.Report(_driver.Accumulate(value));
     }

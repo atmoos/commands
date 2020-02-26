@@ -1,13 +1,15 @@
 using System;
 using System.Linq;
-using System.Collections.Generic;
 using System.Threading;
+using System.Collections.Generic;
 using Xunit;
 using progressReporting;
 using progressTree;
 
-using static progressTree.extensions.Flow;
+using ReporterFlow = progressTree.extensions.ReporterFlow;
 
+using static progressTree.extensions.Flow;
+using static progressTreeTest.Convenience;
 
 namespace progressTreeTest.extensions
 {
@@ -48,10 +50,49 @@ namespace progressTreeTest.extensions
                 Assert.Equal(expectedProgress, recorder);
             }
         }
-        private static List<Double> ExpectedProgress(Int32 count)
+        [Fact]
+        public void FlowGeneratesTooManyReportsWhenUsedOnCollectionsOf_IReportProgress()
         {
-            Double max = count;
-            return Enumerable.Range(0, count).Select(i => i / max).ToList();
+            const Int32 count = 4;
+            const Int32 subCount = 2;
+            var reporters = Enumerable.Range(0, count).Select(_ => new Reporter(subCount)).ToList();
+            var actual = Enumerate(reporters, (p, c) => p.Enumerate(c, CancellationToken.None));
+            var expected = ExpectedProgress(count * subCount).ToList();
+            Assert.NotEqual(expected, actual);
+        }
+        [Fact]
+        public void ReporterFlowGeneratesExpectedReportsOnCollectionsOf_IReportProgress()
+        {
+            const Int32 count = 2;
+            const Int32 subCount = 4;
+            var reporters = Enumerable.Range(0, count).Select(_ => new Reporter(subCount)).ToList();
+            var actual = Enumerate(reporters, (p, c) => ReporterFlow.Enumerate(p, c, CancellationToken.None));
+            var expected = ExpectedProgress(count * subCount).ToList();
+            Assert.Equal(expected, actual);
+        }
+
+        private IEnumerable<Double> Enumerate(ICollection<Reporter> sequence, Func<Progress, ICollection<Reporter>, IEnumerable<Reporter>> enumerate)
+        {
+            var recorder = new ProgressRecorder<Double>();
+            Progress p = Progress.Create(recorder);
+            foreach(var reporter in enumerate(p, sequence)) {
+                reporter.Execute(p);
+            }
+            return recorder;
+        }
+
+        private sealed class Reporter : IReportProgress
+        {
+            private readonly Int32 _count;
+            public Reporter(Int32 count) => _count = count;
+            public void Execute(Progress progress)
+            {
+                using(var r = progress.Schedule(_count)) {
+                    foreach(var _ in Enumerable.Range(0, _count)) {
+                        r.Report();
+                    }
+                }
+            }
         }
     }
 }
