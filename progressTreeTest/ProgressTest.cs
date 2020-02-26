@@ -92,7 +92,7 @@ namespace progressTreeTest
         {
             using(var reporter = _progressReporter.Schedule(4)) {
                 reporter.Report(); // 1/4
-                Recursive(_progressReporter, 2, 4); // [1/4 ... 2/4]
+                Report(_progressReporter, 2, 4); // [1/4 ... 2/4]
                 reporter.Report(); // 3/4
             }
             var head = new[] { 0d, 0.25d };
@@ -144,6 +144,22 @@ namespace progressTreeTest
                 Report(progress, input);
             }
             Assert.Equal(expected, _actualProgress);
+        }
+        [Fact]
+        public void LargeProgressTreesReportExpectedProgress()
+        {
+            // Powers of two prevent rounding errors.
+            RunTreeComparison(64, 16, 2);
+            RunTreeComparison(64, 16, 2);
+            RunTreeComparison(2, 4, 8, 16, 32, 8);
+            RunTreeComparison(128, 128, 64);
+        }
+        private static void RunTreeComparison(params Int32[] tree)
+        {
+            var actual = new ProgressRecorder<Double>();
+            var expected = new ProgressRecorder<Double>();
+            Report(Progress.Create(actual), expected, tree);
+            Assert.Equal(expected, actual);
         }
     }
 }

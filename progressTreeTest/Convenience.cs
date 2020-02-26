@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using progressReporting;
 using progressTree;
 
 using static System.Linq.Enumerable;
@@ -23,29 +24,35 @@ namespace progressTreeTest
                 }
             }
         }
-        public static void Recursive(Progress progress, params Int32[] tree)
+        public static void Report(Progress progress, params Int32[] tree) => Report(progress, Extensions.Empty<Double>(), tree);
+        public static void Report(Progress progress, IProgress<Double> expected, params Int32[] tree)
         {
             if(tree == null || tree.Length == 0) {
                 return;
             }
-            void Report(Int32 depth)
+            Double Recursive(Int32 depth, Double state, Int32 denominator)
             {
                 Int32 width = tree[depth];
                 if(depth + 1 == tree.Length) {
+                    var div = (Double)denominator * width;
                     using(var r = progress.Schedule(width)) {
-                        foreach(var _ in Range(0, width)) {
+                        foreach(var pos in Range(0, width)) {
                             r.Report();
+                            expected.Report(state + pos / div);
                         }
                     }
-                    return;
+                    return state + 1d / denominator;
                 }
+                denominator *= width;
                 using(progress.Schedule(width)) {
                     foreach(var _ in Range(0, width)) {
-                        Report(depth + 1);
+                        state = Recursive(depth + 1, state, denominator);
                     }
                 }
+                return state;
             }
-            Report(0);
+            expected.Report(Recursive(0, 0, 1));
+            return;
         }
         public static Int32 Report(IProgress<Double> progress, params Double[] range)
         {
