@@ -23,25 +23,29 @@ namespace progressTreeTest
                 }
             }
         }
-        public static void Recursive(Progress progressReporter, params Int32[] depthAndWidth)
+        public static void Recursive(Progress progress, params Int32[] tree)
         {
-            void Expand(Progress progress, Queue<Int32> tree)
+            if(tree == null || tree.Length == 0) {
+                return;
+            }
+            void Report(Int32 depth)
             {
-                if(!tree.TryDequeue(out Int32 depth)) {
+                Int32 width = tree[depth];
+                if(depth + 1 == tree.Length) {
+                    using(var r = progress.Schedule(width)) {
+                        foreach(var _ in Range(0, width)) {
+                            r.Report();
+                        }
+                    }
                     return;
                 }
-                Int32 width = depth % 3 + 1;
                 using(progress.Schedule(width)) {
-                    foreach(var use in Range(0, width)) {
-                        using(progress.Schedule(depth)) {
-                            foreach(var step in Enumerable.Range(0, depth)) {
-                                Expand(progress, tree);
-                            }
-                        }
+                    foreach(var _ in Range(0, width)) {
+                        Report(depth + 1);
                     }
                 }
             }
-            Expand(progressReporter, new Queue<Int32>(depthAndWidth));
+            Report(0);
         }
         public static Int32 Report(IProgress<Double> progress, params Double[] range)
         {
