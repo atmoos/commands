@@ -2,6 +2,7 @@ using System;
 
 namespace progressReporting
 {
+    internal delegate Boolean InRange<TProgress>(in Range<TProgress> range, in TProgress value) where TProgress : IComparable<TProgress>;
     public readonly struct Range<TProgress>
         where TProgress : IComparable<TProgress>
     {
@@ -32,14 +33,14 @@ namespace progressReporting
             _range = range;
             _progress = progress;
         }
-        public IProgress<TProgress> Inclusive() => new BoundedProgress(_progress, _range, (r, v) => r.Inclusive(v));
-        public IProgress<TProgress> Exclusive() => new BoundedProgress(_progress, _range, (r, v) => r.Exclusive(v));
+        public IProgress<TProgress> Inclusive() => new BoundedProgress(_progress, _range, (in Range<TProgress> r, in TProgress v) => r.Inclusive(v));
+        public IProgress<TProgress> Exclusive() => new BoundedProgress(_progress, _range, (in Range<TProgress> r, in TProgress v) => r.Exclusive(v));
         private sealed class BoundedProgress : IProgress<TProgress>
         {
             private readonly Range<TProgress> _range;
             private readonly IProgress<TProgress> _progress;
-            private readonly Func<Range<TProgress>, TProgress, Boolean> _withinBounds;
-            public BoundedProgress(IProgress<TProgress> progress, in Range<TProgress> range, Func<Range<TProgress>, TProgress, Boolean> withinBounds)
+            private readonly InRange<TProgress> _withinBounds;
+            public BoundedProgress(IProgress<TProgress> progress, in Range<TProgress> range, InRange<TProgress> withinBounds)
             {
                 _range = range;
                 _progress = progress;
@@ -47,7 +48,7 @@ namespace progressReporting
             }
             public void Report(TProgress value)
             {
-                if(_withinBounds(_range, value)) {
+                if(_withinBounds(in _range, in value)) {
                     _progress.Report(value);
                 }
             }
