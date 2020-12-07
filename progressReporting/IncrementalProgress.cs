@@ -5,7 +5,7 @@ namespace progressReporting
 {
     internal delegate TProgress Add<TProgress>(in TProgress left, in TProgress right);
     internal sealed class IncrementalProgress<TProgress> : IProgress<TProgress>
-        where TProgress : IComparable<TProgress>
+        where TProgress : unmanaged, IComparable<TProgress>
     {
         private TProgress _next;
         private readonly Add<TProgress> _add;

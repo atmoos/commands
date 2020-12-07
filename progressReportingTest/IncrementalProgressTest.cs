@@ -20,6 +20,17 @@ namespace progressReportingTest
         }
 
         [Fact]
+        public void FirstValueCanBeLargerThanIncrement()
+        {
+            var input = new[] { 6, 10, 14 };
+            var expected = new[] { 6, 10, 14 };
+
+            var actual = TestInt32(input);
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
         public void SmallIncrementsAreFiltered()
         {
             var input = Enumerable.Range(0, 9);
@@ -110,10 +121,23 @@ namespace progressReportingTest
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public void WorksWithUInt16()
+        {
+            UInt16 increment = 32;
+            var input = new UInt16[] { 3, 8, 32, 34, 50, 70 };
+            var expected = new UInt16[] { 3, 32, 70 };
+
+            var actual = TestUInt16(increment, input);
+
+            Assert.Equal(expected, actual);
+        }
+
         private static IEnumerable<Int32> TestInt32(IEnumerable<Int32> input) => Test<Int32>(4, Addition, 0, input);
+        private static IEnumerable<UInt16> TestUInt16(UInt16 increment, IEnumerable<UInt16> input) => Test<UInt16>(increment, Addition, 0, input);
         private static IEnumerable<Double> TestDouble(Double increment, IEnumerable<Double> input) => Test<Double>(increment, Addition, 0d, input);
         private static IEnumerable<TProgress> Test<TProgress>(TProgress increment, Add<TProgress> add, TProgress root, IEnumerable<TProgress> input)
-         where TProgress : IComparable<TProgress>
+         where TProgress : unmanaged, IComparable<TProgress>
         {
             var recorder = new ProgressRecorder<TProgress>();
             var incremental = new IncrementalProgress<TProgress>(recorder, increment, add, root);
@@ -124,6 +148,7 @@ namespace progressReportingTest
         }
 
         private static Double Addition(in Double left, in Double right) => left + right;
+        private static UInt16 Addition(in UInt16 left, in UInt16 right) => (UInt16)(left + right);
         private static Int32 Addition(in Int32 left, in Int32 right) => left + right;
     }
 }
