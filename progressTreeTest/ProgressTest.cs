@@ -1,10 +1,9 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using Xunit;
-using progressTree;
+using System.Linq;
 using progressReporting;
-
+using progressTree;
+using Xunit;
 using static progressTreeTest.Convenience;
 
 namespace progressTreeTest
@@ -172,6 +171,18 @@ namespace progressTreeTest
             Assert.Equal(expected2, actual2);
             Assert.Equal(expected3, actual3);
             Assert.Equal(expected4, actual4);
+        }
+
+        [Fact]
+        public void NoProgressIsReportedWhenEmptyProgressIsUsed()
+        {
+            var progress = Progress.Empty;
+            var actualProgress = new ProgressRecorder<Double>();
+            using(var reporter = progress.Schedule(3, actualProgress)) {
+                reporter.Report();
+                reporter.Report();
+            }
+            Assert.Empty(actualProgress);
         }
 
         private static void RunTreeComparison(params Int32[] tree)
