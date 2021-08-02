@@ -1,12 +1,9 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using Xunit;
-using progressTree;
+using System.Linq;
 using progressReporting;
-
-using Stack = progressTree.Stack<progressTree.Reporter>;
-
+using progressTree;
+using Xunit;
 using static progressTreeTest.Convenience;
 
 namespace progressTreeTest
@@ -14,14 +11,14 @@ namespace progressTreeTest
     public sealed class ReporterTest : IExportedProgressTest
     {
         private const Int32 STEPS = 2;
-        private readonly Stack _stack;
+        private readonly Progress _root;
         private readonly Reporter _reporter;
         private readonly ProgressRecorder<Double> _progress;
         public ReporterTest()
         {
             _progress = new ProgressRecorder<Double>();
-            _stack = Reporter.Root(_progress);
-            _reporter = new Reporter(_stack, ProgressDriver.Create(STEPS), _progress);
+            _root = Progress.Create(_progress);
+            _reporter = new Reporter(_root, ProgressDriver.Create(STEPS), _progress);
         }
         [Fact]
         public void ZeroIsReportedUponCreation()
@@ -38,14 +35,14 @@ namespace progressTreeTest
         public void ResetIsPerformedUponDisposal()
         {
             _reporter.Dispose();
-            Assert.NotEqual(_stack.Peek(), _reporter);
+            Assert.NotEqual(_root.Exchange(null), _reporter);
         }
         [Fact]
         public void ReportAdvancesProgress()
         {
             const Int32 steps = 4;
             var progress = new ProgressRecorder<Double>();
-            using(var reporter = new Reporter(_stack, ProgressDriver.Create(steps), progress)) {
+            using(var reporter = new Reporter(_root, ProgressDriver.Create(steps), progress)) {
                 foreach(var _ in Enumerable.Range(0, steps)) {
                     reporter.Report();
                 }
@@ -58,7 +55,7 @@ namespace progressTreeTest
             const Int32 steps = 4;
             const Int32 overflowFactor = 2;
             var progress = new ProgressRecorder<Double>();
-            using(var reporter = new Reporter(_stack, ProgressDriver.Create(steps), progress)) {
+            using(var reporter = new Reporter(_root, ProgressDriver.Create(steps), progress)) {
                 foreach(var _ in Enumerable.Range(0, steps * overflowFactor)) {
                     reporter.Report();
                 }
