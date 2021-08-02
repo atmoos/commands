@@ -50,17 +50,18 @@ namespace progressTreeTest
             Assert.Equal(ExpectedProgress(steps), progress);
         }
         [Fact]
-        public void ReportedProgressStaysWithinBounds()
+        public void ReportedProgressPerformsNoBoundChecks()
         {
             const Int32 steps = 4;
-            const Int32 overflowFactor = 2;
+            const Int32 oneStepTooMany = steps + 1;
             var progress = new ProgressRecorder<Double>();
+            var expectedProgress = ExpectedProgress(steps).Append(1.25);
             using(var reporter = new Reporter(_root, ProgressDriver.Create(steps), progress)) {
-                foreach(var _ in Enumerable.Range(0, steps * overflowFactor)) {
+                foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
                     reporter.Report();
                 }
             }
-            Assert.Equal(ExpectedProgress(steps), progress);
+            Assert.Equal(expectedProgress, progress);
         }
         [Fact]
         public void ExportedProgressIsScaled()

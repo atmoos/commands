@@ -177,12 +177,47 @@ namespace progressTreeTest
         public void NoProgressIsReportedWhenEmptyProgressIsUsed()
         {
             var progress = Progress.Empty;
-            var actualProgress = new ProgressRecorder<Double>();
-            using(var reporter = progress.Schedule(3, actualProgress)) {
+            using(var reporter = progress.Schedule(3, _actualProgress)) {
                 reporter.Report();
                 reporter.Report();
             }
-            Assert.Empty(actualProgress);
+            Assert.Empty(_actualProgress);
+        }
+
+        [Fact]
+        public void TopLevelProgressIsBounded()
+        {
+            const Int32 expectedSteps = 3;
+            const Int32 oneStepTooMany = expectedSteps + 1;
+            var expectedProgress = ExpectedProgress(expectedSteps);
+            var progress = Progress.Create(_actualProgress);
+
+            using(var reporter = progress.Schedule(expectedSteps)) {
+                foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
+                    reporter.Report();
+                }
+            }
+            Assert.Equal(expectedProgress, _actualProgress);
+        }
+
+        [Fact]
+        public void SubLevelProgressIsBounded()
+        {
+            const Int32 expectedSteps = 4;
+            const Int32 oneStepTooMany = expectedSteps + 1;
+            var expectedProgress = ExpectedProgress(expectedSteps);
+            var progress = Progress.Create(Extensions.Empty<Double>());
+
+            using(var reporter = progress.Schedule(3)) {
+                reporter.Report();
+                using(var subReporter = progress.Schedule(expectedSteps, _actualProgress)) {
+                    foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
+                        subReporter.Report();
+                    }
+                }
+                reporter.Report();
+            }
+            Assert.Equal(expectedProgress, _actualProgress);
         }
 
         private static void RunTreeComparison(params Int32[] tree)

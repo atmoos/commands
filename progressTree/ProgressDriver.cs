@@ -1,6 +1,6 @@
 using System;
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 
 namespace progressTree
 {
@@ -24,7 +24,7 @@ namespace progressTree
                 _currentIteration = 0;
                 _expectedIterations = expectedIterations;
             }
-            public override Double Advance() => ((Double)Interlocked.Increment(ref _currentIteration)) / _expectedIterations;
+            public override Double Advance() => Interlocked.Increment(ref _currentIteration) / _expectedIterations;
             public override Double Accumulate(Double childProgress) => (_currentIteration + childProgress) / _expectedIterations;
         }
         private sealed class TemporalDriver : ProgressDriver
@@ -45,11 +45,9 @@ namespace progressTree
             private Double _currentDelta;
             private readonly Double _range;
             private readonly Double _lower;
-            private readonly TProgress _target;
             private readonly INonLinearProgress<TProgress> _nlProgress;
             public FunctionalDriver(TProgress target, INonLinearProgress<TProgress> nlProgress)
             {
-                _target = target;
                 _nlProgress = nlProgress;
                 _lower = nlProgress.Linearise(nlProgress.Progress());
                 _range = Math.Abs(nlProgress.Linearise(target) - _lower);
@@ -62,10 +60,10 @@ namespace progressTree
                 const Double b = 1d - a;
                 Double delta = Math.Abs(_nlProgress.Linearise(_nlProgress.Progress()) - _lower);
                 Double stepSize = delta - Interlocked.Exchange(ref _currentDelta, delta);
-                Interlocked.Exchange(ref _stepSize, a * stepSize + b * _stepSize);
+                Interlocked.Exchange(ref _stepSize, (a * stepSize) + (b * _stepSize));
                 return delta / _range;
             }
-            public override Double Accumulate(Double childProgress) => (_currentDelta + _stepSize * childProgress) / _range;
+            public override Double Accumulate(Double childProgress) => (_currentDelta + (_stepSize * childProgress)) / _range;
         }
     }
     public sealed class NlProgressAdapter<TProgress> : INonLinearProgress<TProgress>

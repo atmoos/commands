@@ -30,9 +30,7 @@ namespace progressTree
         public void Report()
         {
             var progress = _driver.Advance();
-            if(progress <= 1d) {
-                _rootProgress.Report(progress);
-            }
+            _rootProgress.Report(progress);
         }
         public IProgress<Double> Export() => Progress.Monotonic().Strictly.Increasing().Bounded(0, 1).Inclusive();
 
