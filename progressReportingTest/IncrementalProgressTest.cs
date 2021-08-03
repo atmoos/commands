@@ -1,8 +1,8 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using Xunit;
+using System.Linq;
 using progressReporting;
+using Xunit;
 
 namespace progressReportingTest
 {
@@ -133,22 +133,17 @@ namespace progressReportingTest
             Assert.Equal(expected, actual);
         }
 
-        private static IEnumerable<Int32> TestInt32(IEnumerable<Int32> input) => Test<Int32>(4, Addition, 0, input);
-        private static IEnumerable<UInt16> TestUInt16(UInt16 increment, IEnumerable<UInt16> input) => Test<UInt16>(increment, Addition, 0, input);
-        private static IEnumerable<Double> TestDouble(Double increment, IEnumerable<Double> input) => Test<Double>(increment, Addition, 0d, input);
-        private static IEnumerable<TProgress> Test<TProgress>(TProgress increment, Add<TProgress> add, TProgress root, IEnumerable<TProgress> input)
-         where TProgress : unmanaged, IComparable<TProgress>
+        private static IEnumerable<Int32> TestInt32(IEnumerable<Int32> input) => Test(p => p.Incremental(4), input);
+        private static IEnumerable<UInt16> TestUInt16(UInt16 increment, IEnumerable<UInt16> input) => Test(p => p.Incremental(increment), input);
+        private static IEnumerable<Double> TestDouble(Double increment, IEnumerable<Double> input) => Test(p => p.Incremental(increment), input);
+        private static IEnumerable<TProgress> Test<TProgress>(Func<IProgress<TProgress>, IProgress<TProgress>> getIncrementalProgress, IEnumerable<TProgress> input)
         {
             var recorder = new ProgressRecorder<TProgress>();
-            var incremental = new IncrementalProgress<TProgress>(recorder, increment, add, root);
+            var incremental = getIncrementalProgress(recorder);
             foreach(var value in input) {
                 incremental.Report(value);
             }
             return recorder;
         }
-
-        private static Double Addition(in Double left, in Double right) => left + right;
-        private static UInt16 Addition(in UInt16 left, in UInt16 right) => (UInt16)(left + right);
-        private static Int32 Addition(in Int32 left, in Int32 right) => left + right;
     }
 }

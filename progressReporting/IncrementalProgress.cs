@@ -43,6 +43,14 @@ namespace progressReporting
         {
             return new IncrementalProgress<Byte>(progress, in increment, (in Byte l, in Byte r) => (Byte)(l + r), in root);
         }
+        public static IProgress<Int32> Incremental(this IProgress<Int32> progress, in Int32 increment, in Int32 root = default)
+        {
+            return new IncrementalProgress<Int32>(progress, in increment, (in Int32 l, in Int32 r) => l + r, in root);
+        }
+        public static IProgress<Int64> Incremental(this IProgress<Int64> progress, in Int64 increment, in Int64 root = default)
+        {
+            return new IncrementalProgress<Int64>(progress, in increment, (in Int64 l, in Int64 r) => l + r, in root);
+        }
         public static IProgress<UInt64> Incremental(this IProgress<UInt64> progress, in UInt64 increment, in UInt64 root = default)
         {
             return new IncrementalProgress<UInt64>(progress, in increment, (in UInt64 l, in UInt64 r) => l + r, in root);
