@@ -20,7 +20,7 @@ namespace progressTree.extensions
             where TEnumerable : IEnumerable<TElement>
         {
             token.ThrowIfCancellationRequested();
-            using(Reporter reporter = create(progress, elements)) {
+            using(var reporter = create(progress, elements)) {
                 foreach(TElement element in elements) {
                     token.ThrowIfCancellationRequested();
                     yield return element;
@@ -28,9 +28,9 @@ namespace progressTree.extensions
                 }
             }
         }
-        public static async IAsyncEnumerable<TimeSpan> AtIntervals(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation]CancellationToken token)
+        public static async IAsyncEnumerable<TimeSpan> AtIntervals(this Progress progress, TimeSpan duration, TimeSpan interval, [EnumeratorCancellation] CancellationToken token)
         {
-            using(Reporter reporter = progress.Schedule(duration)) {
+            using(var reporter = progress.Schedule(duration)) {
                 await foreach(var timeStamp in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {
                     if(timeStamp > duration) {
                         break;
@@ -40,11 +40,11 @@ namespace progressTree.extensions
                 }
             }
         }
-        public static async IAsyncEnumerable<TProgress> Approach<TProgress>(this Progress progress, TProgress target, INonLinearProgress<TProgress> nonLinearProgress, [EnumeratorCancellation]CancellationToken token, TimeSpan interval)
+        public static async IAsyncEnumerable<TProgress> Approach<TProgress>(this Progress progress, TProgress target, INonLinearProgress<TProgress> nonLinearProgress, [EnumeratorCancellation] CancellationToken token, TimeSpan interval)
         {
             var linearTarget = nonLinearProgress.Linearise(target);
             var view = new NonLinearView<TProgress>(nonLinearProgress);
-            using(Reporter reporter = progress.Schedule(target, view)) {
+            using(var reporter = progress.Schedule(target, view)) {
                 Double delta = 0;
                 var prevDelta = Double.PositiveInfinity;
                 await foreach(var _ in new TimerStream(interval).WithCancellation(token).ConfigureAwait(false)) {
@@ -73,8 +73,8 @@ namespace progressTree.extensions
                 _linearProgress = 0;
                 _nlProgress = nlProgress;
             }
-            public Double Linearise(TProgress progress) => (_linearProgress = _nlProgress.Linearise(progress));
-            public TProgress Progress() => (_current = _nlProgress.Progress());
+            public Double Linearise(TProgress progress) => _linearProgress = _nlProgress.Linearise(progress);
+            public TProgress Progress() => _current = _nlProgress.Progress();
         }
     }
 }

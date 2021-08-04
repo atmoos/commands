@@ -32,13 +32,13 @@ namespace progressTree
             var progress = _driver.Advance();
             _rootProgress.Report(progress);
         }
-        public IProgress<Double> Export() => Progress.Monotonic().Strictly.Increasing().Bounded(0, 1).Inclusive();
+        public IProgress<Double> Export() => Progress.Bounded(0, 1).Inclusive().Monotonic().Strictly.Increasing();
 
         public void Dispose()
         {
             _root.Exchange(_parent);
             _parent.Report();
         }
-        internal static Reporter Root(Progress root, IProgress<Double> progress) => new Reporter(root, progress);
+        internal static Reporter Root(Progress root, IProgress<Double> progress) => new(root, progress);
     }
 }
