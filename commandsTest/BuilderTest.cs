@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using commands;
-using commands.tools;
 using commands.commands;
+using commands.tools;
 using commandsTest.commands;
-
-using static commands.extensions.Builder;
 using progressTree;
+using Xunit;
+using static commands.extensions.Builder;
 
 namespace commandsTest
 {
@@ -20,10 +19,9 @@ namespace commandsTest
             Int32 actualSum = -1;
             Int32 expectedSum = 8;
             ICommand<Int32, Int32> increment = new Increment();
-            Builder<Int32> compiler = Builder<Int32>.Start(Initialize.Create(0));
-            compiler.Chain(increment, (UInt64)expectedSum).Add(result => actualSum = result);
+            var compiler = Builder.Start(Initialize.Create(0)).Chain(increment, (UInt64)expectedSum).Add(result => actualSum = result);
             ICommand executor = compiler.Compile();
-            await executor.Execute(CancellationToken.None, Progress.Empty);
+            await executor.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
             Assert.Equal(expectedSum, actualSum);
         }
     }

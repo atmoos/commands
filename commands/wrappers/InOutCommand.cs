@@ -4,19 +4,21 @@ using progressTree;
 
 namespace commands.commands
 {
-    internal sealed class InOutCommand<TArgument, TResult> : ICommand, IResult<TResult>
+    internal sealed class InOutCommand<TArgument, TResult> : ICommandOut<TResult>
     {
-        private readonly IResult<TArgument> _resultGetter;
-        private readonly ICommand<TArgument, TResult> _command;
-        public TResult Result { get; private set; }
-        internal InOutCommand(ICommand<TArgument, TResult> command, IResult<TArgument> resultGetter)
+        private readonly ICommandOut<TArgument> argument;
+        private readonly ICommand<TArgument, TResult> consumer;
+        public InOutCommand(ICommandOut<TArgument> argument, ICommand<TArgument, TResult> consumer)
         {
-            _command = command;
-            _resultGetter = resultGetter;
+            this.argument = argument;
+            this.consumer = consumer;
         }
-        public async Task Execute(CancellationToken cancellationToken, Progress progress)
+        public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
         {
-            Result = await _command.Execute(_resultGetter.Result, cancellationToken, progress).ConfigureAwait(false);
+            using(progress.Schedule(2)) {
+                var argument = await this.argument.Execute(cancellationToken, progress).ConfigureAwait(false);
+                return await this.consumer.Execute(argument, cancellationToken, progress).ConfigureAwait(false);
+            }
         }
     }
 }

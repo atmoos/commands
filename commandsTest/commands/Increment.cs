@@ -8,6 +8,11 @@ namespace commandsTest.commands
 {
     public sealed class Increment : ICommand<Int32, Int32>
     {
-        public Task<Int32> Execute(Int32 argument, CancellationToken cancellationToken, Progress progress) => Task.FromResult(argument + 1);
+        public Task<Int32> Execute(Int32 argument, CancellationToken _, Progress progress)
+        {
+            using(progress.Schedule(1)) {
+                return Task.FromResult(argument + 1);
+            }
+        }
     }
 }

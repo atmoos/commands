@@ -1,6 +1,6 @@
 namespace commands.tools
 {
-    public interface IBuilder
+    public interface IBuilder : IGenerator
     {
         IBuilder Add(ICommand command);
         IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command);
