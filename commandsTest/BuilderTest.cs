@@ -7,7 +7,7 @@ using commands.tools;
 using commandsTest.commands;
 using progressTree;
 using Xunit;
-using static commands.extensions.Builder;
+using static commands.extensions.BuildExtensions;
 
 namespace commandsTest
 {
@@ -16,12 +16,11 @@ namespace commandsTest
         [Fact]
         public async Task ChainCommandsOnBuilder()
         {
-            Int32 actualSum = -1;
             Int32 expectedSum = 8;
             ICommand<Int32, Int32> increment = new Increment();
-            var compiler = Builder.Start(Initialize.Create(0)).Chain(increment, (UInt64)expectedSum).Add(result => actualSum = result);
-            ICommand executor = compiler.Compile();
-            await executor.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
+            var compiler = Initialize.Create(0).StartBuilder().Chain(increment, (UInt64)expectedSum);
+            var executor = compiler.Build();
+            var actualSum = await executor.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
             Assert.Equal(expectedSum, actualSum);
         }
     }
