@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
-using commands.commands;
 using commands.tools;
+using commands.tools.builders;
 
 namespace commands.extensions
 {
