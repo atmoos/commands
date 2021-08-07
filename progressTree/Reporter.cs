@@ -37,6 +37,7 @@ namespace progressTree
         public void Dispose()
         {
             _root.Exchange(_parent);
+            _rootProgress.Report(1);
             _parent.Report();
         }
         internal static Reporter Root(Progress root, IProgress<Double> progress) => new(root, progress);

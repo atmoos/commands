@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using progressReporting;
 using progressTree;
 using Xunit;
@@ -218,6 +219,52 @@ namespace progressTreeTest
                 reporter.Report();
             }
             Assert.Equal(expectedProgress, _actualProgress);
+        }
+
+        [Fact]
+        public async Task OneIsReportedUponDisposalOfTemporalReporting()
+        {
+            var progress = Progress.Create(_actualProgress);
+            using(progress.Schedule(TimeSpan.MaxValue)) {
+                await Task.Yield();
+            }
+            Assert.Contains(1d, _actualProgress);
+        }
+
+        [Fact]
+        public async Task OneIsReportedUponDisposalOfTemporalReportingWhenReportComesDelayed()
+        {
+            var progress = Progress.Create(_actualProgress);
+            var scheduledTime = TimeSpan.FromMilliseconds(8);
+            using(var r = progress.Schedule(scheduledTime)) {
+                await Task.Delay(1.4 * scheduledTime).ConfigureAwait(false);
+                r.Report();
+            }
+            Assert.Contains(1d, _actualProgress);
+        }
+
+        [Fact]
+        public async Task OneIsReportedUponDisposalOfTemporalReportingOnSubProgressWhenReportComesDelayed()
+        {
+            var scheduledTime = TimeSpan.FromMilliseconds(8);
+            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(scheduledTime, _actualProgress)) {
+                await Task.Delay(1.4 * scheduledTime).ConfigureAwait(false);
+                r.Report();
+            }
+            Assert.Contains(1d, _actualProgress);
+        }
+
+
+        [Fact]
+        public void OneIsReportedUponDisposalOfIncrementalReportingOnSubProgressWhenReportComesDelayed()
+        {
+            var steps = 2;
+            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(steps, _actualProgress)) {
+                foreach(var _ in Enumerable.Range(0, steps + 1)) {
+                    r.Report();
+                }
+            }
+            Assert.Contains(1d, _actualProgress);
         }
 
         private static void RunTreeComparison(params Int32[] tree)

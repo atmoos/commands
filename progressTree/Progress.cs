@@ -31,6 +31,6 @@ namespace progressTree
         internal Reporter Exchange(Reporter next) => Interlocked.Exchange(ref _current, next);
         private Reporter CreateReporter(ProgressDriver driver, IProgress<Double> progress) => new(this, driver, progress);
         private Reporter KeepCurrent(ProgressDriver _, IProgress<Double> __) => _current;
-        private static IProgress<Double> Guard(IProgress<Double> progress) => progress.Bounded(0, 1).Inclusive().Monotonic().Strictly.Increasing();
+        private static IProgress<Double> Guard(IProgress<Double> progress) => progress.Monotonic().Strictly.Increasing().Bounded(0, 1).Inclusive();
     }
 }

@@ -47,7 +47,8 @@ namespace progressTreeTest
                     reporter.Report();
                 }
             }
-            Assert.Equal(ExpectedProgress(steps), progress);
+            // Steps and disposal both advances progress by one, so ignore all that come after 'steps' intervals.
+            Assert.Equal(ExpectedProgress(steps), progress.Take(steps + 1));
         }
         [Fact]
         public void ReportedProgressPerformsNoBoundChecks()
@@ -55,7 +56,7 @@ namespace progressTreeTest
             const Int32 steps = 4;
             const Int32 oneStepTooMany = steps + 1;
             var progress = new ProgressRecorder<Double>();
-            var expectedProgress = ExpectedProgress(steps).Append(1.25);
+            var expectedProgress = ExpectedProgress(steps).Append(1.25).Append(1); // The last "1" is due to disposal..
             using(var reporter = new Reporter(_root, ProgressDriver.Create(steps), progress)) {
                 foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
                     reporter.Report();
