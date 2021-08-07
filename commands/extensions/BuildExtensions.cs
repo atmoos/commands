@@ -7,7 +7,7 @@ namespace commands.extensions
 {
     public static class BuildExtensions
     {
-        public static IBuilder StartBuilder(this ICommand command) => new Builder(new() { command });
+        public static IBuilder StartBuilder(this ICommand command) => new RootBuilder(command);
         public static IBuilder<TResult> StartBuilder<TResult>(this ICommandOut<TResult> command) => new RootBuilder<TResult>(command);
         public static IBuilder Add(this IBuilder builder, Action action) => builder.Add(new VoidCommand(action));
         public static IBuilder Add(this IBuilder builder, Action<CancellationToken> action) => builder.Add(new VoidCommand(action));
