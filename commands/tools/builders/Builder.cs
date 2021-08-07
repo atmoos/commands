@@ -6,12 +6,12 @@ using progressTree;
 
 namespace commands.tools.builders
 {
-    internal sealed class Builder : IBuilder, IRun
+    internal sealed class Builder : IBuilder, ICommandChain
     {
-        private readonly IRun pre;
+        private readonly ICommandChain pre;
         private readonly List<ICommand> commands;
         public Int32 Count => commands.Count + pre.Count;
-        public Builder(IRun pre, ICommand command)
+        public Builder(ICommandChain pre, ICommand command)
         {
             this.pre = pre;
             this.commands = new List<ICommand> { command };
@@ -24,9 +24,9 @@ namespace commands.tools.builders
         }
         public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command) => new SourceBuilder<TResult>(this, command);
         public ICommand Build() => new CompiledCommand(this);
-        public async Task Run(CancellationToken cancellationToken, Progress progress)
+        public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
-            await pre.Run(cancellationToken, progress).ConfigureAwait(false);
+            await pre.Execute(cancellationToken, progress).ConfigureAwait(false);
             foreach(var command in commands) {
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
