@@ -9,7 +9,7 @@ namespace commands.tools.builders
     {
         private readonly ICommandChain pre;
         private readonly ICommandOut<TArgument> argument;
-        Int32 ICountable.Count => 1 + pre.Count;
+        Int32 ICountable.Count => 1 + this.pre.Count;
         internal SourceBuilder(ICommandChain pre, ICommandOut<TArgument> argument)
         {
             this.pre = pre;
@@ -20,8 +20,8 @@ namespace commands.tools.builders
         public ICommandOut<TArgument> Build() => new CompiledCommand<TArgument>(this);
         async Task<TArgument> ICommandChain<TArgument>.Execute(CancellationToken cancellationToken, Progress progress)
         {
-            await pre.Execute(cancellationToken, progress).ConfigureAwait(false);
-            return await argument.Execute(cancellationToken, progress).ConfigureAwait(false);
+            await this.pre.Execute(cancellationToken, progress).ConfigureAwait(false);
+            return await this.argument.Execute(cancellationToken, progress).ConfigureAwait(false);
         }
     }
 }

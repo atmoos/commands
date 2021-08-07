@@ -7,9 +7,9 @@
 #### Core EditorConfig Options ####
 
 #### .NET Coding Conventions ####
-dotnet_style_predefined_type_for_member_access = false
-dotnet_style_predefined_type_for_locals_parameters_members = false
-dotnet_style_qualification_for_field = true
+dotnet_style_predefined_type_for_member_access = false:suggestion
+dotnet_style_predefined_type_for_locals_parameters_members = false:suggestion
+dotnet_style_qualification_for_field = true:suggestion
 
 # .NET formatting rules
 dotnet_sort_system_directives_first = true

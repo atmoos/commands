@@ -9,18 +9,18 @@ namespace commands.tools.builders
     internal sealed class RootBuilder : IBuilder, ICommandChain
     {
         private readonly List<ICommand> commands;
-        Int32 ICountable.Count => commands.Count;
-        public RootBuilder(ICommand command) => commands = new List<ICommand> { command };
+        Int32 ICountable.Count => this.commands.Count;
+        public RootBuilder(ICommand command) => this.commands = new List<ICommand> { command };
         public IBuilder Add(ICommand command)
         {
-            commands.Add(command);
+            this.commands.Add(command);
             return this;
         }
         public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command) => new SourceBuilder<TResult>(this, command);
         public ICommand Build() => new CompiledCommand(this);
         async Task ICommandChain.Execute(CancellationToken cancellationToken, Progress progress)
         {
-            foreach(var command in commands) {
+            foreach(var command in this.commands) {
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }

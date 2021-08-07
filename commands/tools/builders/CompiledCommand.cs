@@ -10,8 +10,8 @@ namespace commands.tools.builders
         public CompiledCommand(ICommandChain chain) => this.chain = chain;
         public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
-            using(progress.Schedule(chain.Count)) {
-                await chain.Execute(cancellationToken, progress).ConfigureAwait(false);
+            using(progress.Schedule(this.chain.Count)) {
+                await this.chain.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }
     }

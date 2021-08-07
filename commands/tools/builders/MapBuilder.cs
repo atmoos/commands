@@ -9,7 +9,7 @@ namespace commands.tools.builders
     {
         private readonly ICommandChain<TArgument> source;
         private readonly ICommand<TArgument, TResult> map;
-        Int32 ICountable.Count => 1 + source.Count;
+        Int32 ICountable.Count => 1 + this.source.Count;
         internal MapBuilder(ICommandChain<TArgument> source, ICommand<TArgument, TResult> map)
         {
             this.source = source;

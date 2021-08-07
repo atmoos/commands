@@ -7,14 +7,14 @@ namespace commands.commands
 {
     internal sealed class VoidCommand : ICommand
     {
-        private readonly Action<CancellationToken> _action;
+        private readonly Action<CancellationToken> action;
         public VoidCommand(Action action) : this(_ => action()) { }
-        public VoidCommand(Action<CancellationToken> action) => _action = action;
+        public VoidCommand(Action<CancellationToken> action) => this.action = action;
         public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
             using(progress.Schedule(1)) {
                 await Task.Yield();
-                _action(cancellationToken);
+                this.action(cancellationToken);
             }
         }
     }

@@ -10,9 +10,9 @@ namespace commandsTest.commands
         public static ICommandOut<TInitial> Create<TInitial>(TInitial initial) => new InitializeImpl<TInitial>(initial);
         private sealed class InitializeImpl<TInitial> : ICommandOut<TInitial>
         {
-            public TInitial _initial;
-            public InitializeImpl(TInitial initial) => _initial = initial;
-            public Task<TInitial> Execute(CancellationToken _, Progress __) => Task.FromResult(_initial);
+            public TInitial initial;
+            public InitializeImpl(TInitial initial) => this.initial = initial;
+            public Task<TInitial> Execute(CancellationToken _, Progress __) => Task.FromResult(this.initial);
         }
     }
 }
