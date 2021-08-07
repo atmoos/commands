@@ -9,7 +9,7 @@ namespace commands.tools.builders
     internal sealed class RootBuilder : IBuilder, ICommandChain
     {
         private readonly List<ICommand> commands;
-        public Int32 Count => commands.Count;
+        Int32 ICountable.Count => commands.Count;
         public RootBuilder(ICommand command) => commands = new List<ICommand> { command };
         public IBuilder Add(ICommand command)
         {
@@ -18,7 +18,7 @@ namespace commands.tools.builders
         }
         public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command) => new SourceBuilder<TResult>(this, command);
         public ICommand Build() => new CompiledCommand(this);
-        public async Task Execute(CancellationToken cancellationToken, Progress progress)
+        async Task ICommandChain.Execute(CancellationToken cancellationToken, Progress progress)
         {
             foreach(var command in commands) {
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
@@ -28,7 +28,7 @@ namespace commands.tools.builders
     internal sealed class RootBuilder<TResult> : ICommandChain<TResult>, IBuilder<TResult>
     {
         private readonly ICommandOut<TResult> argument;
-        public Int32 Count => 1;
+        Int32 ICountable.Count => 1;
         public RootBuilder(ICommandOut<TResult> argument) => this.argument = argument;
         public IBuilder Add(ICommandIn<TResult> command) => new SinkBuilder<TResult>(this, command);
         public IBuilder<TOtherResult> Add<TOtherResult>(ICommand<TResult, TOtherResult> command) => new MapBuilder<TResult, TOtherResult>(this, command);

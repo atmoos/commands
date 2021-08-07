@@ -9,7 +9,7 @@ namespace commands.tools.builders
     {
         private readonly ICommandChain<TArgument> source;
         private readonly ICommand<TArgument, TResult> map;
-        public Int32 Count => 1 + source.Count;
+        Int32 ICountable.Count => 1 + source.Count;
         internal MapBuilder(ICommandChain<TArgument> source, ICommand<TArgument, TResult> map)
         {
             this.source = source;
@@ -18,10 +18,10 @@ namespace commands.tools.builders
         public IBuilder Add(ICommandIn<TResult> command) => new SinkBuilder<TResult>(this, command);
         public IBuilder<TOtherResult> Add<TOtherResult>(ICommand<TResult, TOtherResult> command) => new MapBuilder<TResult, TOtherResult>(this, command);
         public ICommandOut<TResult> Build() => new CompiledCommand<TResult>(this);
-        public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
+        async Task<TResult> ICommandChain<TResult>.Execute(CancellationToken cancellationToken, Progress progress)
         {
-            var argument = await source.Execute(cancellationToken, progress).ConfigureAwait(false);
-            return await map.Execute(argument, cancellationToken, progress).ConfigureAwait(false);
+            var argument = await this.source.Execute(cancellationToken, progress).ConfigureAwait(false);
+            return await this.map.Execute(argument, cancellationToken, progress).ConfigureAwait(false);
         }
     }
 }

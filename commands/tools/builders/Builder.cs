@@ -10,7 +10,7 @@ namespace commands.tools.builders
     {
         private readonly ICommandChain pre;
         private readonly List<ICommand> commands;
-        public Int32 Count => commands.Count + pre.Count;
+        Int32 ICountable.Count => commands.Count + pre.Count;
         public Builder(ICommandChain pre, ICommand command)
         {
             this.pre = pre;
@@ -24,7 +24,7 @@ namespace commands.tools.builders
         }
         public IBuilder<TResult> Add<TResult>(ICommandOut<TResult> command) => new SourceBuilder<TResult>(this, command);
         public ICommand Build() => new CompiledCommand(this);
-        public async Task Execute(CancellationToken cancellationToken, Progress progress)
+        async Task ICommandChain.Execute(CancellationToken cancellationToken, Progress progress)
         {
             await pre.Execute(cancellationToken, progress).ConfigureAwait(false);
             foreach(var command in commands) {
