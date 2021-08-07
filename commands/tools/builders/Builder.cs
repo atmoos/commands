@@ -28,6 +28,7 @@ namespace commands.tools.builders
         {
             await this.pre.Execute(cancellationToken, progress).ConfigureAwait(false);
             foreach(var command in this.commands) {
+                cancellationToken.ThrowIfCancellationRequested();
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }

@@ -21,6 +21,7 @@ namespace commands.tools.builders
         async Task ICommandChain.Execute(CancellationToken cancellationToken, Progress progress)
         {
             foreach(var command in this.commands) {
+                cancellationToken.ThrowIfCancellationRequested();
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }

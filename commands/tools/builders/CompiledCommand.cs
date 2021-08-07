@@ -11,6 +11,7 @@ namespace commands.tools.builders
         public async Task Execute(CancellationToken cancellationToken, Progress progress)
         {
             using(progress.Schedule(this.chain.Count)) {
+                cancellationToken.ThrowIfCancellationRequested();
                 await this.chain.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }
@@ -22,6 +23,7 @@ namespace commands.tools.builders
         public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
         {
             using(progress.Schedule(this.chain.Count)) {
+                cancellationToken.ThrowIfCancellationRequested();
                 return await this.chain.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }

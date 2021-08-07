@@ -8,12 +8,12 @@ namespace commands.tools.builders
     internal sealed class SourceBuilder<TArgument> : IBuilder<TArgument>, ICommandChain<TArgument>
     {
         private readonly ICommandChain pre;
-        private readonly ICommandOut<TArgument> argument;
+        private readonly ICommandOut<TArgument> sink;
         Int32 ICountable.Count => 1 + this.pre.Count;
-        internal SourceBuilder(ICommandChain pre, ICommandOut<TArgument> argument)
+        internal SourceBuilder(ICommandChain pre, ICommandOut<TArgument> sink)
         {
             this.pre = pre;
-            this.argument = argument;
+            this.sink = sink;
         }
         public IBuilder Add(ICommandIn<TArgument> command) => new SinkBuilder<TArgument>(this, command);
         public IBuilder<TResult> Add<TResult>(ICommand<TArgument, TResult> command) => new MapBuilder<TArgument, TResult>(this, command);
@@ -21,7 +21,8 @@ namespace commands.tools.builders
         async Task<TArgument> ICommandChain<TArgument>.Execute(CancellationToken cancellationToken, Progress progress)
         {
             await this.pre.Execute(cancellationToken, progress).ConfigureAwait(false);
-            return await this.argument.Execute(cancellationToken, progress).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            return await this.sink.Execute(cancellationToken, progress).ConfigureAwait(false);
         }
     }
 }

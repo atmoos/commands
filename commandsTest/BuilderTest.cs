@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using commands;
-using commandsTest.commands;
+using commands.extensions;
+using commands.tools;
+using progressReporting;
 using progressTree;
 using Xunit;
-using static commands.extensions.BuildExtensions;
-using static commands.extensions.FuncExtensions;
 
 namespace commandsTest
 {
@@ -15,11 +15,10 @@ namespace commandsTest
         [Fact]
         public async Task ChainCommandsOnBuilder()
         {
-            Int32 expectedSum = 8;
-            ICommand<Int32, Int32> increment = new Increment();
-            var compiler = Initialize.Create(0).StartBuilder().Chain(increment, (UInt64)expectedSum);
-            var executor = compiler.Build();
-            var actualSum = await executor.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
+            const Int32 expectedSum = 8;
+            Func<Int32, Int32> increment = i => i + 1;
+            var command = Builder(() => 0).Chain(increment.ToCommand(), expectedSum).Build();
+            var actualSum = await command.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
             Assert.Equal(expectedSum, actualSum);
         }
 
@@ -27,10 +26,36 @@ namespace commandsTest
         public async Task AddCommandAccrossVariousTypes()
         {
             const Double expectedValue = Math.PI;
-            Func<Double> init = () => expectedValue;
-            var command = init.StartBuilder().Add(d => d.ToString("R")).Add(Decimal.Parse).Add(d => (Double)d).Build();
+            var command = Builder(() => expectedValue).Add(d => d.ToString("R")).Add(Decimal.Parse).Add(d => (Double)d).Build();
             var roundRobin = await command.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
             Assert.Equal(expectedValue, roundRobin);
         }
+
+        [Fact]
+        public async Task BuiltCommandCanBeCancelled()
+        {
+            using(var cancellation = new CancellationTokenSource()) {
+                void cancelCommand(Int32 _) => cancellation.Cancel();
+                var fourChainedCommands = Builder(() => 0).Add(i => i + 3).Add(cancelCommand).Add(() => 66).Build();
+                await Assert.ThrowsAsync<OperationCanceledException>(async () => await fourChainedCommands.Execute(cancellation.Token, Progress.Empty).ConfigureAwait(false)).ConfigureAwait(false);
+            }
+        }
+
+
+        [Fact]
+        public async Task BuiltCommandReportsProgress()
+        {
+            const Int32 chainedCommandCount = 16;
+            var actualProgress = new ProgressRecorder<Double>();
+            Func<Int32, Int32> increment = i => i + 1;
+            var chainedCommands = Builder(() => 1).Chain(increment.ToCommand(), chainedCommandCount - 1).Build();
+
+            await chainedCommands.Execute(CancellationToken.None, Progress.Create(actualProgress)).ConfigureAwait(false);
+
+            var expectedProgress = Enumerable.Range(0, chainedCommandCount + 1).Select(i => (Double)i / chainedCommandCount);
+            Assert.Equal(expectedProgress, actualProgress);
+        }
+
+        private static IBuilder<TOut> Builder<TOut>(Func<TOut> init) => init.StartBuilder();
     }
 }
