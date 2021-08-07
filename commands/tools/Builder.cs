@@ -19,7 +19,31 @@ namespace commands.tools
     {
         Task<TSource> Run(CancellationToken cancellationToken, Progress progress);
     }
-    internal sealed class RootBuilder : IBuilder, ICommand, IRun
+
+    internal sealed class CompiledCommand : ICommand
+    {
+        private readonly IRun runner;
+        public CompiledCommand(IRun runner) => this.runner = runner;
+        public async Task Execute(CancellationToken cancellationToken, Progress progress)
+        {
+            using(progress.Schedule(this.runner.Count)) {
+                await this.runner.Run(cancellationToken, progress).ConfigureAwait(false);
+            }
+        }
+    }
+    internal sealed class CompiledCommand<TResult> : ICommandOut<TResult>
+    {
+        private readonly IRun<TResult> runner;
+        public CompiledCommand(IRun<TResult> runner) => this.runner = runner;
+        public async Task<TResult> Execute(CancellationToken cancellationToken, Progress progress)
+        {
+            using(progress.Schedule(this.runner.Count)) {
+                return await this.runner.Run(cancellationToken, progress).ConfigureAwait(false);
+            }
+        }
+    }
+
+    internal sealed class RootBuilder : IBuilder, IRun
     {
         private readonly List<ICommand> commands;
 
@@ -42,20 +66,13 @@ namespace commands.tools
 
         public ICommand Build()
         {
-            return this;
+            return new CompiledCommand(this);
         }
 
         public async Task Run(CancellationToken cancellationToken, Progress progress)
         {
             foreach(var command in this.commands) {
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
-            }
-        }
-
-        async Task ICommand.Execute(CancellationToken cancellationToken, Progress progress)
-        {
-            using(progress.Schedule(Count)) {
-                await this.Run(cancellationToken, progress).ConfigureAwait(false);
             }
         }
     }
@@ -78,11 +95,6 @@ namespace commands.tools
             return new ThroughBuilder<TResult, TOtherResult>(this, command);
         }
 
-        public ICommandOut<TOtherResult> Build<TOtherResult>(ICommand<TResult, TOtherResult> command)
-        {
-            return new ThroughBuilder<TResult, TOtherResult>(this, command);
-        }
-
         public ICommandOut<TResult> Build()
         {
             return this.argument;
@@ -93,7 +105,7 @@ namespace commands.tools
             return await this.argument.Execute(cancellationToken, progress).ConfigureAwait(false);
         }
     }
-    internal sealed class Builder : IBuilder, ICommand, IRun
+    internal sealed class Builder : IBuilder, IRun
     {
         private readonly IRun pre;
         private readonly List<ICommand> commands;
@@ -117,7 +129,7 @@ namespace commands.tools
 
         public ICommand Build()
         {
-            return this;
+            return new CompiledCommand(this);
         }
 
         public async Task Run(CancellationToken cancellationToken, Progress progress)
@@ -127,15 +139,8 @@ namespace commands.tools
                 await command.Execute(cancellationToken, progress).ConfigureAwait(false);
             }
         }
-
-        async Task ICommand.Execute(CancellationToken cancellationToken, Progress progress)
-        {
-            using(progress.Schedule(this.Count)) {
-                await this.Run(cancellationToken, progress).ConfigureAwait(false);
-            }
-        }
     }
-    internal sealed class SourceBuilder<TArgument> : IBuilder<TArgument>, ICommandOut<TArgument>, IRun<TArgument>
+    internal sealed class SourceBuilder<TArgument> : IBuilder<TArgument>, IRun<TArgument>
     {
         private readonly IRun command;
         private readonly ICommandOut<TArgument> argument;
@@ -158,7 +163,7 @@ namespace commands.tools
 
         public ICommandOut<TArgument> Build()
         {
-            return this;
+            return new CompiledCommand<TArgument>(this);
         }
 
         public async Task<TArgument> Run(CancellationToken cancellationToken, Progress progress)
@@ -166,15 +171,8 @@ namespace commands.tools
             await this.command.Run(cancellationToken, progress).ConfigureAwait(false);
             return await this.argument.Execute(cancellationToken, progress).ConfigureAwait(false);
         }
-
-        async Task<TArgument> ICommandOut<TArgument>.Execute(CancellationToken cancellationToken, Progress progress)
-        {
-            using(progress.Schedule(this.Count)) {
-                return await this.Run(cancellationToken, progress).ConfigureAwait(false);
-            }
-        }
     }
-    internal sealed class SinkBuilder<TResult> : IBuilder, ICommand, IRun
+    internal sealed class SinkBuilder<TResult> : IBuilder, IRun
     {
         private readonly IRun<TResult> source;
         private readonly ICommandIn<TResult> sink;
@@ -199,7 +197,7 @@ namespace commands.tools
 
         public ICommand Build()
         {
-            return this;
+            return new CompiledCommand(this);
         }
 
         public async Task Run(CancellationToken cancellationToken, Progress progress)
@@ -207,16 +205,9 @@ namespace commands.tools
             TResult argument = await this.source.Run(cancellationToken, progress).ConfigureAwait(false);
             await this.sink.Execute(argument, cancellationToken, progress).ConfigureAwait(false);
         }
-
-        async Task ICommand.Execute(CancellationToken cancellationToken, Progress progress)
-        {
-            using(progress.Schedule(this.Count)) {
-                await this.Run(cancellationToken, progress).ConfigureAwait(false);
-            }
-        }
     }
 
-    public sealed class ThroughBuilder<TArgument, TResult> : IBuilder<TResult>, ICommandOut<TResult>, IRun<TResult>
+    public sealed class ThroughBuilder<TArgument, TResult> : IBuilder<TResult>, IRun<TResult>
     {
         private readonly IRun<TArgument> source;
         private readonly ICommand<TArgument, TResult> map;
@@ -241,20 +232,13 @@ namespace commands.tools
 
         public ICommandOut<TResult> Build()
         {
-            return this;
+            return new CompiledCommand<TResult>(this);
         }
 
         public async Task<TResult> Run(CancellationToken cancellationToken, Progress progress)
         {
             var argument = await this.source.Run(cancellationToken, progress).ConfigureAwait(false);
             return await this.map.Execute(argument, cancellationToken, progress).ConfigureAwait(false);
-        }
-
-        async Task<TResult> ICommandOut<TResult>.Execute(CancellationToken cancellationToken, Progress progress)
-        {
-            using(progress.Schedule(this.Count)) {
-                return await this.Run(cancellationToken, progress).ConfigureAwait(false);
-            }
         }
     }
 }

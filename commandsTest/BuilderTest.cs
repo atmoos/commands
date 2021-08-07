@@ -2,12 +2,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using commands;
-using commands.commands;
-using commands.tools;
 using commandsTest.commands;
 using progressTree;
 using Xunit;
 using static commands.extensions.BuildExtensions;
+using static commands.extensions.FuncExtensions;
 
 namespace commandsTest
 {
@@ -22,6 +21,16 @@ namespace commandsTest
             var executor = compiler.Build();
             var actualSum = await executor.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
             Assert.Equal(expectedSum, actualSum);
+        }
+
+        [Fact]
+        public async Task AddCommandAccrossVariousTypes()
+        {
+            const Double expectedValue = Math.PI;
+            Func<Double> init = () => expectedValue;
+            var command = init.StartBuilder().Add(d => d.ToString("R")).Add(Decimal.Parse).Add(d => (Double)d).Build();
+            var roundRobin = await command.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
+            Assert.Equal(expectedValue, roundRobin);
         }
     }
 }
