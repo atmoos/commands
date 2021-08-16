@@ -3,22 +3,42 @@
 Writing software often includes having a chain of commands one wants to execute. This library aims at providing just that. A simple command interface
 
 ```csharp
-Task Execute(CancellationToken cancellationToken, IProgress<T> progress);
+Task Execute(CancellationToken cancellationToken, Progress progress);
 ```
 
 with a bunch of tools that build on that interface.
 
-## Principles
-- asynchonous
-- functional
-- imutable
-- easy to implement and read
-- free tooling
-- dendency injection
-- tested
+## Sample Code
+The following example illustrates how commands can easily be chained to gether including typesafe output and input arguments.
 
-## Ideas
-- Combine progress and cancellation on the same type?
-- Have extensions methods on Progress
-- Have wrappers that wrap command progress in any IProgress<T> via metric mappers (mapping T -> Double). Useful to integrate other progress reporting methods.
-- Have progress that reports on the state of a (linear) process with (lower?) and upper bounds. For, say, the state of a heating process that should reach a certain temperature.
+```csharp
+const Double expectedValue = Math.PI;
+var command = StartBuilder(() => expectedValue)
+                .Add(d => d.ToString("R"))
+                .Add(Decimal.Parse)
+                .Add(d => (Double)d)
+                .Build();
+Double roundRobin = await command.Execute(CancellationToken.None, Progress.Empty).ConfigureAwait(false);
+Console.WriteLine($"expected: {expectedValue:g4}");
+Console.WriteLine($"actual: {roundRobin:g4}");
+```
+
+The output is:
+```text
+expected: 3.142
+actual: 3.142
+```
+
+## Principles
+The four driving principles governing the design of this library are:
+- Commands can be __executed__
+- Commands support __cancellation__
+- Commands report on the current __progress__
+- Results and arguments are passed from command to command fully __typed__ and [null safe](https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references)
+
+## Ideas to explore
+- Deal with ``IAsyncEnumerable<T>`` elegantly.
+- Support a non asynchronous version.
+  - Including elegant transition from one to the other.
+- Include parallelisation extensions for both progress reporting and commands.
+- Make commands monadic, supporting *Select* and *SelectMany*.
