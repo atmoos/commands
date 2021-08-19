@@ -11,20 +11,20 @@ namespace progressReportingTest
         [Fact]
         public void CreatingWithEmptyRangeThrows()
         {
-            Xunit.Assert.Throws<ArgumentException>(() => _actualProgress.Bounded(2, 2));
-            Xunit.Assert.Throws<ArgumentException>(() => _actualProgress.Bounded(3, 1));
-            Xunit.Assert.Throws<ArgumentException>(() => _actualProgress.Bounded(1, -1));
+            Xunit.Assert.Throws<ArgumentException>(() => this._actualProgress.Bounded(2, 2));
+            Xunit.Assert.Throws<ArgumentException>(() => this._actualProgress.Bounded(3, 1));
+            Xunit.Assert.Throws<ArgumentException>(() => this._actualProgress.Bounded(1, -1));
         }
         [Fact]
         public void InclusiveRangeIncludesBoundaries()
         {
-            var progress = _actualProgress.Bounded(0d, Math.PI).Inclusive();
+            var progress = this._actualProgress.Bounded(0d, Math.PI).Inclusive();
             Assert(progress, 0d, Math.PI, 1.23d, 2d, 3d);
         }
         [Fact]
         public void ExclusiveRangeExcludesBoundaries()
         {
-            var progress = _actualProgress.Bounded(-2d, Math.PI).Exclusive();
+            var progress = this._actualProgress.Bounded(-2d, Math.PI).Exclusive();
             Assert(progress, 0d, 1.23d, 2d, 3d);
         }
         private void Assert(IProgress<Double> progress, params Double[] expected)
@@ -32,7 +32,7 @@ namespace progressReportingTest
             foreach(var value in Input) {
                 progress.Report(value);
             }
-            Xunit.Assert.Equal(expected, _actualProgress);
+            Xunit.Assert.Equal(expected, this._actualProgress);
         }
     }
 

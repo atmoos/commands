@@ -30,11 +30,11 @@ namespace progressReporting
         private readonly IProgress<TProgress> _progress;
         public BoundedProgressBuilder(IProgress<TProgress> progress, in Range<TProgress> range)
         {
-            _range = range;
-            _progress = progress;
+            this._range = range;
+            this._progress = progress;
         }
-        public IProgress<TProgress> Inclusive() => new BoundedProgress(_progress, _range, (in Range<TProgress> r, in TProgress v) => r.Inclusive(v));
-        public IProgress<TProgress> Exclusive() => new BoundedProgress(_progress, _range, (in Range<TProgress> r, in TProgress v) => r.Exclusive(v));
+        public IProgress<TProgress> Inclusive() => new BoundedProgress(this._progress, this._range, (in Range<TProgress> r, in TProgress v) => r.Inclusive(v));
+        public IProgress<TProgress> Exclusive() => new BoundedProgress(this._progress, this._range, (in Range<TProgress> r, in TProgress v) => r.Exclusive(v));
         private sealed class BoundedProgress : IProgress<TProgress>
         {
             private readonly Range<TProgress> _range;
@@ -42,14 +42,14 @@ namespace progressReporting
             private readonly InRange<TProgress> _withinBounds;
             public BoundedProgress(IProgress<TProgress> progress, in Range<TProgress> range, InRange<TProgress> withinBounds)
             {
-                _range = range;
-                _progress = progress;
-                _withinBounds = withinBounds;
+                this._range = range;
+                this._progress = progress;
+                this._withinBounds = withinBounds;
             }
             public void Report(TProgress value)
             {
-                if(_withinBounds(in _range, in value)) {
-                    _progress.Report(value);
+                if(this._withinBounds(in this._range, in value)) {
+                    this._progress.Report(value);
                 }
             }
         }

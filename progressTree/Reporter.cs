@@ -13,32 +13,32 @@ namespace progressTree
         internal IProgress<Double> Progress { get; }
         private Reporter(Progress root, IProgress<Double> progress)
         {
-            _root = root;
-            _parent = this;
-            _driver = ProgressDriver.Create(1);
-            Progress = _rootProgress = progress;
+            this._root = root;
+            this._parent = this;
+            this._driver = ProgressDriver.Create(1);
+            Progress = this._rootProgress = progress;
         }
         internal Reporter(Progress root, ProgressDriver driver, IProgress<Double> progress)
         {
-            _root = root;
-            _driver = driver;
-            _rootProgress = progress;
-            _parent = root.Exchange(this);
+            this._root = root;
+            this._driver = driver;
+            this._rootProgress = progress;
+            this._parent = root.Exchange(this);
             progress.Report(0);
-            Progress = new DriverWrapper(_driver, progress);
+            Progress = new DriverWrapper(this._driver, progress);
         }
         public void Report()
         {
-            var progress = _driver.Advance();
-            _rootProgress.Report(progress);
+            var progress = this._driver.Advance();
+            this._rootProgress.Report(progress);
         }
         public IProgress<Double> Export() => Progress.Bounded(0, 1).Inclusive().Monotonic().Strictly.Increasing();
 
         public void Dispose()
         {
-            _root.Exchange(_parent);
-            _rootProgress.Report(1);
-            _parent.Report();
+            this._root.Exchange(this._parent);
+            this._rootProgress.Report(1);
+            this._parent.Report();
         }
         internal static Reporter Root(Progress root, IProgress<Double> progress) => new(root, progress);
     }

@@ -13,5 +13,6 @@ dotnet_style_qualification_for_field = true:suggestion
 
 # .NET formatting rules
 dotnet_sort_system_directives_first = true
+csharp_prefer_braces = true:suggestion
 
 #### Diagnostic configuration ####

@@ -84,11 +84,11 @@ namespace progressTreeTest.extensions
         private sealed class Reporter : IReportProgress
         {
             private readonly Int32 _count;
-            public Reporter(Int32 count) => _count = count;
+            public Reporter(Int32 count) => this._count = count;
             public void Execute(Progress progress)
             {
-                using(var r = progress.Schedule(_count)) {
-                    foreach(var _ in Enumerable.Range(0, _count)) {
+                using(var r = progress.Schedule(this._count)) {
+                    foreach(var _ in Enumerable.Range(0, this._count)) {
                         r.Report();
                     }
                 }

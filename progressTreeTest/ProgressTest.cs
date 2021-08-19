@@ -13,15 +13,15 @@ namespace progressTreeTest
     {
         private readonly ProgressRecorder<Double> _actualProgress;
 
-        public ProgressTest() => _actualProgress = new ProgressRecorder<Double>();
+        public ProgressTest() => this._actualProgress = new ProgressRecorder<Double>();
 
         [Fact]
         public void IterativeProgress()
         {
             const Int32 iterations = 8;
             var expected = ExpectedProgress(iterations);
-            GenerateProgress(Progress.Create(_actualProgress), iterations);
-            Assert.Equal(expected, _actualProgress);
+            GenerateProgress(Progress.Create(this._actualProgress), iterations);
+            Assert.Equal(expected, this._actualProgress);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace progressTreeTest
             const Int32 childIterations = 4;
             const Int32 parentIterations = 8;
             var childReports = new List<IEnumerable<Double>>();
-            var progressReporter = Progress.Create(_actualProgress);
+            var progressReporter = Progress.Create(this._actualProgress);
             using(var parentReport = progressReporter.Schedule(parentIterations)) {
                 for(Int32 p = 0; p < parentIterations; ++p) {
                     var subProgress = new ProgressRecorder<Double>();
@@ -46,13 +46,13 @@ namespace progressTreeTest
             foreach(var subReport in childReports) {
                 Assert.Equal(expectedSubReport, subReport);
             }
-            Assert.Equal(ExpectedProgress(childIterations * parentIterations), _actualProgress);
+            Assert.Equal(ExpectedProgress(childIterations * parentIterations), this._actualProgress);
         }
         [Fact]
         public void ScheduledReportsAreStable()
         {
             List<Double> expected = new List<Double>();
-            var progressReporter = Progress.Create(_actualProgress);
+            var progressReporter = Progress.Create(this._actualProgress);
             using(progressReporter.Schedule(4)) {
                 expected.Add(0);
                 using(var r = progressReporter.Schedule(3)) {
@@ -82,12 +82,12 @@ namespace progressTreeTest
                 // forget reporting 4/4
             }
             expected.Add(4d / 4); // upon disposal
-            Assert.Equal(expected, _actualProgress);
+            Assert.Equal(expected, this._actualProgress);
         }
         [Fact]
         public void NestedReportsAreWellBehaved()
         {
-            var progressReporter = Progress.Create(_actualProgress);
+            var progressReporter = Progress.Create(this._actualProgress);
             using(var reporter = progressReporter.Schedule(4)) {
                 reporter.Report(); // 1/4
                 Report(progressReporter, 2, 4); // [1/4 ... 2/4]
@@ -95,19 +95,19 @@ namespace progressTreeTest
             }
             var head = new[] { 0d, 0.25d };
             var tail = new[] { 0.5d, 0.75d, 1d };
-            Assert.Equal(head, _actualProgress.Take(2));
-            Assert.Equal(tail, _actualProgress.TakeLast(3));
-            Assert.True(_actualProgress.Count() > head.Length + tail.Length, "Sanity check that there is an absurdly long middle range");
+            Assert.Equal(head, this._actualProgress.Take(2));
+            Assert.Equal(tail, this._actualProgress.TakeLast(3));
+            Assert.True(this._actualProgress.Count() > head.Length + tail.Length, "Sanity check that there is an absurdly long middle range");
         }
         [Fact]
         public void ExportedProgressIsScaled()
         {
             var input = new[] { 0, 0.2, 0.4, 0.6, 1 };
             var expected = new[] { 0, 0.1, 0.2, 0.3, 0.5, 1 };
-            using(var r = Progress.Create(_actualProgress).Schedule(2)) {
+            using(var r = Progress.Create(this._actualProgress).Schedule(2)) {
                 Report(r.Export(), input);
             }
-            Assert.Equal(expected, _actualProgress);
+            Assert.Equal(expected, this._actualProgress);
         }
 
         [Fact]
@@ -116,32 +116,32 @@ namespace progressTreeTest
             var input = new[] { 0, 0.2, 0.4, 0.8, 1 };
             var expected = new[] { 0, 0.05, 0.1, 0.2, 0.25, 1 };
             var actual = new ProgressRecorder<Double>();
-            using(var r = Progress.Create(_actualProgress).Schedule(4, actual)) {
+            using(var r = Progress.Create(this._actualProgress).Schedule(4, actual)) {
                 Report(r.Export(), input);
             }
-            Assert.Equal(expected, _actualProgress);
+            Assert.Equal(expected, this._actualProgress);
         }
         [Fact]
         public void ExportedProgressIsStrictlyMonotonic()
         {
             var input = new[] { 0.2, 0, 0.4, 0.3, 0.6, -1 };
             var expected = new[] { 0, 0.1, 0.2, 0.3, 1 };
-            using(var r = Progress.Create(_actualProgress).Schedule(2)) {
+            using(var r = Progress.Create(this._actualProgress).Schedule(2)) {
                 IProgress<Double> progress = r.Export();
                 Report(progress, input);
             }
-            Assert.Equal(expected, _actualProgress);
+            Assert.Equal(expected, this._actualProgress);
         }
         [Fact]
         public void OutOfBoundExportedProgressIsIgnored()
         {
             var input = new[] { -1.1, 0, 0.4, 0.1, 1.0, 1.2, 4.2 };
             var expected = new[] { 0, 0.2, 0.5, 1 };
-            using(var r = Progress.Create(_actualProgress).Schedule(2)) {
+            using(var r = Progress.Create(this._actualProgress).Schedule(2)) {
                 IProgress<Double> progress = r.Export();
                 Report(progress, input);
             }
-            Assert.Equal(expected, _actualProgress);
+            Assert.Equal(expected, this._actualProgress);
         }
         [Fact]
         public void LargeSymetricProgressTreesReportExpectedProgress()
@@ -154,20 +154,20 @@ namespace progressTreeTest
         [Fact]
         public void AsymmetricTrees()
         {
-            Report(Progress.Create(_actualProgress),
+            Report(Progress.Create(this._actualProgress),
                                             new[] { 2 },
                                             new[] { 4, 2 },
                                             new[] { 2 },
                                             new[] { 4 }
             );
             var expected1 = ExpectedProgress(0, 2, 0.25);
-            var actual1 = _actualProgress.Section(0, 3);
+            var actual1 = this._actualProgress.Section(0, 3);
             var expected2 = ExpectedProgress(0.25, 4 * 2, 0.5);
-            var actual2 = _actualProgress.Section(2, 9);
+            var actual2 = this._actualProgress.Section(2, 9);
             var expected3 = ExpectedProgress(0.5, 2, 0.75);
-            var actual3 = _actualProgress.Section(10, 3);
+            var actual3 = this._actualProgress.Section(10, 3);
             var expected4 = ExpectedProgress(0.75, 4, 1);
-            var actual4 = _actualProgress.Section(12, 5);
+            var actual4 = this._actualProgress.Section(12, 5);
             Assert.Equal(expected1, actual1);
             Assert.Equal(expected2, actual2);
             Assert.Equal(expected3, actual3);
@@ -178,11 +178,11 @@ namespace progressTreeTest
         public void NoProgressIsReportedWhenEmptyProgressIsUsed()
         {
             var progress = Progress.Empty;
-            using(var reporter = progress.Schedule(3, _actualProgress)) {
+            using(var reporter = progress.Schedule(3, this._actualProgress)) {
                 reporter.Report();
                 reporter.Report();
             }
-            Assert.Empty(_actualProgress);
+            Assert.Empty(this._actualProgress);
         }
 
         [Fact]
@@ -191,14 +191,14 @@ namespace progressTreeTest
             const Int32 expectedSteps = 3;
             const Int32 oneStepTooMany = expectedSteps + 1;
             var expectedProgress = ExpectedProgress(expectedSteps);
-            var progress = Progress.Create(_actualProgress);
+            var progress = Progress.Create(this._actualProgress);
 
             using(var reporter = progress.Schedule(expectedSteps)) {
                 foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
                     reporter.Report();
                 }
             }
-            Assert.Equal(expectedProgress, _actualProgress);
+            Assert.Equal(expectedProgress, this._actualProgress);
         }
 
         [Fact]
@@ -211,47 +211,47 @@ namespace progressTreeTest
 
             using(var reporter = progress.Schedule(3)) {
                 reporter.Report();
-                using(var subReporter = progress.Schedule(expectedSteps, _actualProgress)) {
+                using(var subReporter = progress.Schedule(expectedSteps, this._actualProgress)) {
                     foreach(var _ in Enumerable.Range(0, oneStepTooMany)) {
                         subReporter.Report();
                     }
                 }
                 reporter.Report();
             }
-            Assert.Equal(expectedProgress, _actualProgress);
+            Assert.Equal(expectedProgress, this._actualProgress);
         }
 
         [Fact]
         public async Task OneIsReportedUponDisposalOfTemporalReporting()
         {
-            var progress = Progress.Create(_actualProgress);
+            var progress = Progress.Create(this._actualProgress);
             using(progress.Schedule(TimeSpan.MaxValue)) {
                 await Task.Yield();
             }
-            Assert.Contains(1d, _actualProgress);
+            Assert.Contains(1d, this._actualProgress);
         }
 
         [Fact]
         public async Task OneIsReportedUponDisposalOfTemporalReportingWhenReportComesDelayed()
         {
-            var progress = Progress.Create(_actualProgress);
+            var progress = Progress.Create(this._actualProgress);
             var scheduledTime = TimeSpan.FromMilliseconds(8);
             using(var r = progress.Schedule(scheduledTime)) {
                 await Task.Delay(1.4 * scheduledTime).ConfigureAwait(false);
                 r.Report();
             }
-            Assert.Contains(1d, _actualProgress);
+            Assert.Contains(1d, this._actualProgress);
         }
 
         [Fact]
         public async Task OneIsReportedUponDisposalOfTemporalReportingOnSubProgressWhenReportComesDelayed()
         {
             var scheduledTime = TimeSpan.FromMilliseconds(8);
-            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(scheduledTime, _actualProgress)) {
+            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(scheduledTime, this._actualProgress)) {
                 await Task.Delay(1.4 * scheduledTime).ConfigureAwait(false);
                 r.Report();
             }
-            Assert.Contains(1d, _actualProgress);
+            Assert.Contains(1d, this._actualProgress);
         }
 
 
@@ -259,12 +259,12 @@ namespace progressTreeTest
         public void OneIsReportedUponDisposalOfIncrementalReportingOnSubProgressWhenReportComesDelayed()
         {
             var steps = 2;
-            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(steps, _actualProgress)) {
+            using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(steps, this._actualProgress)) {
                 foreach(var _ in Enumerable.Range(0, steps + 1)) {
                     r.Report();
                 }
             }
-            Assert.Contains(1d, _actualProgress);
+            Assert.Contains(1d, this._actualProgress);
         }
 
         private static void RunTreeComparison(params Int32[] tree)

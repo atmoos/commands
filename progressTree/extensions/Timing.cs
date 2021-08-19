@@ -16,15 +16,15 @@ namespace progressTree.extensions
         }
         public Interval(Int32 count, TimeSpan interval)
         {
-            _intervalls = count;
-            _stream = new TimerStream(interval);
+            this._intervalls = count;
+            this._stream = new TimerStream(interval);
         }
         public async IAsyncEnumerator<TimeSpan> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
             Int32 interval = -1;
-            await foreach(TimeSpan timeStamp in _stream.WithCancellation(cancellationToken).ConfigureAwait(false)) {
+            await foreach(TimeSpan timeStamp in this._stream.WithCancellation(cancellationToken).ConfigureAwait(false)) {
                 yield return timeStamp;
-                if(interval++ > _intervalls) {
+                if(interval++ > this._intervalls) {
                     break;
                 }
             }
@@ -38,7 +38,7 @@ namespace progressTree.extensions
             if(interval <= TimeSpan.Zero) {
                 throw new ArgumentOutOfRangeException($"Interval must be in the half open interval of ]0, ∞[. Received: {interval:g}");
             }
-            _interval = interval.Ticks;
+            this._interval = interval.Ticks;
         }
         public async IAsyncEnumerator<TimeSpan> GetAsyncEnumerator(CancellationToken cancellationToken = default)
         {
@@ -48,8 +48,8 @@ namespace progressTree.extensions
             while(true) {
                 yield return jitterFreeRelativeTime;
                 Int64 delta = Math.Max(timer.Elapsed.Ticks - jitterFreeRelativeTime.Ticks, 0);
-                Int64 relativeTimeIncrement = delta / _interval + constantTimeIncrement;
-                jitterFreeRelativeTime += TimeSpan.FromTicks(relativeTimeIncrement * _interval);
+                Int64 relativeTimeIncrement = delta / this._interval + constantTimeIncrement;
+                jitterFreeRelativeTime += TimeSpan.FromTicks(relativeTimeIncrement * this._interval);
                 await Task.Delay(jitterFreeRelativeTime - timer.Elapsed, cancellationToken).ConfigureAwait(false);
             }
         }

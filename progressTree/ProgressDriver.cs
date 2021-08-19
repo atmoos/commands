@@ -21,11 +21,11 @@ namespace progressTree
             private readonly Double _expectedIterations;
             public IterativeDriver(Int32 expectedIterations)
             {
-                _currentIteration = 0;
-                _expectedIterations = expectedIterations;
+                this._currentIteration = 0;
+                this._expectedIterations = expectedIterations;
             }
-            public override Double Advance() => Interlocked.Increment(ref _currentIteration) / _expectedIterations;
-            public override Double Accumulate(Double childProgress) => (_currentIteration + childProgress) / _expectedIterations;
+            public override Double Advance() => Interlocked.Increment(ref this._currentIteration) / this._expectedIterations;
+            public override Double Accumulate(Double childProgress) => (this._currentIteration + childProgress) / this._expectedIterations;
         }
         private sealed class TemporalDriver : ProgressDriver
         {
@@ -33,10 +33,10 @@ namespace progressTree
             private readonly Double _expectedDuration;
             public TemporalDriver(TimeSpan expectedDuration)
             {
-                _timer = Stopwatch.StartNew();
-                _expectedDuration = expectedDuration.TotalSeconds;
+                this._timer = Stopwatch.StartNew();
+                this._expectedDuration = expectedDuration.TotalSeconds;
             }
-            public override Double Advance() => _timer.Elapsed.TotalSeconds / _expectedDuration;
+            public override Double Advance() => this._timer.Elapsed.TotalSeconds / this._expectedDuration;
             public override Double Accumulate(Double _) => Advance();
         }
         private sealed class FunctionalDriver<TProgress> : ProgressDriver
@@ -48,22 +48,22 @@ namespace progressTree
             private readonly INonLinearProgress<TProgress> _nlProgress;
             public FunctionalDriver(TProgress target, INonLinearProgress<TProgress> nlProgress)
             {
-                _nlProgress = nlProgress;
-                _lower = nlProgress.Linearise(nlProgress.Progress());
-                _range = Math.Abs(nlProgress.Linearise(target) - _lower);
-                _currentDelta = _stepSize = 0d;
+                this._nlProgress = nlProgress;
+                this._lower = nlProgress.Linearise(nlProgress.Progress());
+                this._range = Math.Abs(nlProgress.Linearise(target) - this._lower);
+                this._currentDelta = this._stepSize = 0d;
             }
             public override Double Advance()
             {
                 // const values are parameters for simple IIR filter
                 const Double a = 3d / 5d;
                 const Double b = 1d - a;
-                Double delta = Math.Abs(_nlProgress.Linearise(_nlProgress.Progress()) - _lower);
-                Double stepSize = delta - Interlocked.Exchange(ref _currentDelta, delta);
-                Interlocked.Exchange(ref _stepSize, (a * stepSize) + (b * _stepSize));
-                return delta / _range;
+                Double delta = Math.Abs(this._nlProgress.Linearise(this._nlProgress.Progress()) - this._lower);
+                Double stepSize = delta - Interlocked.Exchange(ref this._currentDelta, delta);
+                Interlocked.Exchange(ref this._stepSize, (a * stepSize) + (b * this._stepSize));
+                return delta / this._range;
             }
-            public override Double Accumulate(Double childProgress) => (_currentDelta + (_stepSize * childProgress)) / _range;
+            public override Double Accumulate(Double childProgress) => (this._currentDelta + (this._stepSize * childProgress)) / this._range;
         }
     }
     public sealed class NlProgressAdapter<TProgress> : INonLinearProgress<TProgress>
@@ -73,10 +73,10 @@ namespace progressTree
 
         public NlProgressAdapter(Func<TProgress> getProgress, Func<TProgress, Double> linearise)
         {
-            _getProgress = getProgress;
-            _linearise = linearise;
+            this._getProgress = getProgress;
+            this._linearise = linearise;
         }
-        public TProgress Progress() => _getProgress();
-        public Double Linearise(TProgress progress) => _linearise(progress);
+        public TProgress Progress() => this._getProgress();
+        public Double Linearise(TProgress progress) => this._linearise(progress);
     }
 }

@@ -8,9 +8,9 @@ namespace progressTree.reporting
         private readonly IProgress<Double> _progress;
         public DriverWrapper(ProgressDriver driver, IProgress<Double> progress)
         {
-            _driver = driver;
-            _progress = progress;
+            this._driver = driver;
+            this._progress = progress;
         }
-        public void Report(Double value) => _progress.Report(_driver.Accumulate(value));
+        public void Report(Double value) => this._progress.Report(this._driver.Accumulate(value));
     }
 }

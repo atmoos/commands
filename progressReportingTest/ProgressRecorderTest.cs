@@ -13,15 +13,15 @@ namespace progressReportingTest
         [Fact]
         public void RecorderRecordsInSameOrderAsValuesAreAdded()
         {
-            var expected = Report(_recorder, RandomIntegers()).Take(7).ToList();
-            Assert.Equal(expected, _recorder);
+            var expected = Report(this._recorder, RandomIntegers()).Take(7).ToList();
+            Assert.Equal(expected, this._recorder);
         }
         [Fact]
         public void IndexingOnRecorderIndexesToCorrectElement()
         {
-            var reference = Report(_recorder, RandomIntegers()).Take(11).ToArray();
+            var reference = Report(this._recorder, RandomIntegers()).Take(11).ToArray();
             for(var index = 0; index < reference.Length; ++index) {
-                Assert.Equal(reference[index], _recorder[index]);
+                Assert.Equal(reference[index], this._recorder[index]);
             }
         }
     }

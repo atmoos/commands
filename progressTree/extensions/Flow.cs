@@ -63,18 +63,18 @@ namespace progressTree.extensions
             private Double _linearProgress;
             private TProgress _current;
             private readonly INonLinearProgress<TProgress> _nlProgress;
-            public Double LinearProgress => _linearProgress;
-            public TProgress Current => _current;
+            public Double LinearProgress => this._linearProgress;
+            public TProgress Current => this._current;
             public NonLinearView(INonLinearProgress<TProgress> nlProgress)
             {
                 // Before current is accessed, it will be set to some value by
                 // a call to Progress() below. Hence, the default will not be used.
-                _current = default!;
-                _linearProgress = 0;
-                _nlProgress = nlProgress;
+                this._current = default!;
+                this._linearProgress = 0;
+                this._nlProgress = nlProgress;
             }
-            public Double Linearise(TProgress progress) => _linearProgress = _nlProgress.Linearise(progress);
-            public TProgress Progress() => _current = _nlProgress.Progress();
+            public Double Linearise(TProgress progress) => this._linearProgress = this._nlProgress.Linearise(progress);
+            public TProgress Progress() => this._current = this._nlProgress.Progress();
         }
     }
 }

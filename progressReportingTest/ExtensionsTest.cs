@@ -1,9 +1,8 @@
 using System;
 using System.Linq;
 using System.Threading;
-using Xunit;
 using progressReporting;
-
+using Xunit;
 using static progressReportingTest.Convenience;
 
 namespace progressReportingTest
@@ -15,7 +14,7 @@ namespace progressReportingTest
         {
             var progressA = new ProgressRecorder<Int32>();
             var progressB = new ProgressRecorder<Int32>();
-            Report(((IProgress<Int32>)progressA).Zip(progressB), RandomIntegers()).Take(9);
+            Report(((IProgress<Int32>)progressA).Zip(progressB), RandomIntegers());
             Assert.Equal(progressA, progressB);
         }
         [Fact]
