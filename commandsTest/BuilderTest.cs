@@ -41,7 +41,6 @@ namespace commandsTest
             }
         }
 
-
         [Fact]
         public async Task BuiltCommandReportsProgress()
         {

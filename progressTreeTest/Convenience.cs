@@ -14,7 +14,7 @@ namespace progressTreeTest
         public static IEnumerable<Double> ExpectedProgress(Double start, Int32 intervals, Double end)
         {
             var interval = (end - start) / intervals;
-            return Range(0, intervals + 1).Select(index => start + interval * index);
+            return Range(0, intervals + 1).Select(index => start + (interval * index));
         }
         public static void GenerateProgress(Progress progress, Int32 iterations)
         {
@@ -54,10 +54,10 @@ namespace progressTreeTest
                     var div = (Double)denominator * width;
                     foreach(var pos in Range(0, width)) {
                         r.Report();
-                        expected.Report(state + pos / div);
+                        expected.Report(state + (pos / div));
                     }
                 }
-                return state + 1d / denominator;
+                return state + (1d / denominator);
             }
             expected.Report(Recursive(0, 0, 1));
             return;

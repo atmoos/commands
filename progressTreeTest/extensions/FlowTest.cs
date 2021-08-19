@@ -1,15 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Collections.Generic;
-using Xunit;
 using progressReporting;
 using progressTree;
-
-using ReporterFlow = progressTree.extensions.ReporterFlow;
-
+using Xunit;
 using static progressTree.extensions.Flow;
 using static progressTreeTest.Convenience;
+using ReporterFlow = progressTree.extensions.ReporterFlow;
 
 namespace progressTreeTest.extensions
 {
@@ -34,7 +32,7 @@ namespace progressTreeTest.extensions
         [Fact]
         public void EnumerateCanBeCancelled()
         {
-            Int32 successCount = 2;
+            const Int32 successCount = 2;
             var recorder = new ProgressRecorder<Double>();
             using(var cts = new CancellationTokenSource()) {
                 var actions = Enumerable.Repeat<Action>(() => { }, successCount - 1).ToList();
@@ -83,12 +81,12 @@ namespace progressTreeTest.extensions
 
         private sealed class Reporter : IReportProgress
         {
-            private readonly Int32 _count;
-            public Reporter(Int32 count) => this._count = count;
+            private readonly Int32 count;
+            public Reporter(Int32 count) => this.count = count;
             public void Execute(Progress progress)
             {
-                using(var r = progress.Schedule(this._count)) {
-                    foreach(var _ in Enumerable.Range(0, this._count)) {
+                using(var r = progress.Schedule(this.count)) {
+                    foreach(var _ in Enumerable.Range(0, this.count)) {
                         r.Report();
                     }
                 }

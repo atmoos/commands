@@ -6,39 +6,39 @@ namespace progressTree
 {
     public sealed class Reporter : IDisposable
     {
-        private readonly Progress _root;
-        private readonly Reporter _parent;
-        private readonly ProgressDriver _driver;
-        private readonly IProgress<Double> _rootProgress;
+        private readonly Progress root;
+        private readonly Reporter parent;
+        private readonly ProgressDriver driver;
+        private readonly IProgress<Double> rootProgress;
         internal IProgress<Double> Progress { get; }
         private Reporter(Progress root, IProgress<Double> progress)
         {
-            this._root = root;
-            this._parent = this;
-            this._driver = ProgressDriver.Create(1);
-            Progress = this._rootProgress = progress;
+            this.root = root;
+            this.parent = this;
+            this.driver = ProgressDriver.Create(1);
+            Progress = this.rootProgress = progress;
         }
         internal Reporter(Progress root, ProgressDriver driver, IProgress<Double> progress)
         {
-            this._root = root;
-            this._driver = driver;
-            this._rootProgress = progress;
-            this._parent = root.Exchange(this);
+            this.root = root;
+            this.driver = driver;
+            this.rootProgress = progress;
+            this.parent = root.Exchange(this);
             progress.Report(0);
-            Progress = new DriverWrapper(this._driver, progress);
+            Progress = new DriverWrapper(this.driver, progress);
         }
         public void Report()
         {
-            var progress = this._driver.Advance();
-            this._rootProgress.Report(progress);
+            var progress = this.driver.Advance();
+            this.rootProgress.Report(progress);
         }
         public IProgress<Double> Export() => Progress.Bounded(0, 1).Inclusive().Monotonic().Strictly.Increasing();
 
         public void Dispose()
         {
-            this._root.Exchange(this._parent);
-            this._rootProgress.Report(1);
-            this._parent.Report();
+            this.root.Exchange(this.parent);
+            this.rootProgress.Report(1);
+            this.parent.Report();
         }
         internal static Reporter Root(Progress root, IProgress<Double> progress) => new(root, progress);
     }

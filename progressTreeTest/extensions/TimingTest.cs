@@ -102,11 +102,6 @@ namespace progressTreeTest.extensions
                 ReportedTime = reportedTime;
             }
         }
-        private static Double SquareError(TimeStamp value)
-        {
-            Double error = (value.RealTime - value.ReportedTime).TotalSeconds;
-            return error * error;
-        }
 
         private static (Double mean, Double stdDev) StdDev(IEnumerable<Double> values)
         {

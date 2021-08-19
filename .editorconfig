@@ -16,3 +16,17 @@ dotnet_sort_system_directives_first = true
 csharp_prefer_braces = true:suggestion
 
 #### Diagnostic configuration ####
+
+#### Naming styles ####
+# see: https://gist.github.com/rodrigoueda/de313da77eb224d6c3b53f518ac3521b
+
+# Private Fields
+dotnet_naming_rule.private_members.severity = suggestion
+dotnet_naming_rule.private_members.symbols = private_fields
+dotnet_naming_rule.private_members.style = private_member_style
+
+dotnet_naming_style.private_member_style.capitalization = camel_case # and no underscore!
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_fields.required_modifiers = private
