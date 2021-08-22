@@ -28,21 +28,19 @@ namespace progressReporting
             }
         }
 
-        public static IEnumerable<IProgress<T>> Intercept(IProgress<T> root, IEnumerable<IProgress<T>> progress)
+        public static IEnumerable<IProgress<T>> Intercept(IProgress<T> target, IEnumerable<IProgress<T>> progress)
         {
-            var parallelProgress = new ParallelProgress<T>(root, progress);
-            if(parallelProgress.interceptors.Length >= 2) {
-                return parallelProgress.interceptors;
-            }
-            if(parallelProgress.interceptors.Length == 1) {
-                return new[] { root.Zip(progress.First()) };
-            }
-            return new[] { root };
+            var interceptors = new ParallelProgress<T>(target, progress).interceptors;
+            return interceptors.Length switch
+            {
+                0 => new[] { target },
+                1 => new[] { interceptors[0].Wrapped.Zip(target) },
+                _ => interceptors
+            };
         }
 
         private sealed class Interceptor : IProgress<T>
         {
-            private readonly IProgress<T> wrapped;
             private readonly ParallelProgress<T> parent;
             private readonly ReaderWriterLockSlim guard = new();
             private T current;
@@ -57,11 +55,12 @@ namespace progressReporting
                     }
                 }
             }
+            internal IProgress<T> Wrapped { get; }
 
             public Interceptor(ParallelProgress<T> parent, IProgress<T> wrapped)
             {
                 this.parent = parent;
-                this.wrapped = wrapped;
+                this.Wrapped = wrapped;
             }
 
             void IProgress<T>.Report(T value)
@@ -70,7 +69,7 @@ namespace progressReporting
                 this.guard.EnterWriteLock();
                 this.current = value;
                 this.guard.ExitWriteLock();
-                this.wrapped.Report(value);
+                this.Wrapped.Report(value);
             }
         }
     }
