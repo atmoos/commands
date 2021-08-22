@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace progressReporting
 {
@@ -18,11 +18,9 @@ namespace progressReporting
         }
         private void Report(in T value)
         {
-            // ToDo: Make thread safe!!
-            var currentState = this.interceptors.OrderBy(i => i.Current).ToArray();
-            var minValue = currentState[0].Current;
-            var secondToMin = currentState[1].Current;
             Int32 minComparison;
+            var currentState = this.interceptors.Select(i => i.Current).OrderBy(c => c).Take(2).ToArray();
+            var (minValue, secondToMin) = (currentState[0], currentState[1]);
             if((minComparison = minValue.CompareTo(value)) <= 0) {
                 if(minComparison == 0 || value.CompareTo(secondToMin) <= 0) {
                     this.root.Report(value);
@@ -32,15 +30,33 @@ namespace progressReporting
 
         public static IEnumerable<IProgress<T>> Intercept(IProgress<T> root, IEnumerable<IProgress<T>> progress)
         {
-            return new ParallelProgress<T>(root, progress).interceptors;
+            var parallelProgress = new ParallelProgress<T>(root, progress);
+            if(parallelProgress.interceptors.Length >= 2) {
+                return parallelProgress.interceptors;
+            }
+            if(parallelProgress.interceptors.Length == 1) {
+                return new[] { root.Zip(progress.First()) };
+            }
+            return new[] { root };
         }
 
         private sealed class Interceptor : IProgress<T>
         {
-
-            public IProgress<T> wrapped;
-            public ParallelProgress<T> parent;
-            public T Current { get; private set; }
+            private readonly IProgress<T> wrapped;
+            private readonly ParallelProgress<T> parent;
+            private readonly ReaderWriterLockSlim guard = new();
+            private T current;
+            public T Current {
+                get
+                {
+                    try {
+                        this.guard.EnterReadLock();
+                        return this.current;
+                    } finally {
+                        this.guard.ExitReadLock();
+                    }
+                }
+            }
 
             public Interceptor(ParallelProgress<T> parent, IProgress<T> wrapped)
             {
@@ -51,7 +67,9 @@ namespace progressReporting
             void IProgress<T>.Report(T value)
             {
                 this.parent.Report(in value);
-                Current = value;
+                this.guard.EnterWriteLock();
+                this.current = value;
+                this.guard.ExitWriteLock();
                 this.wrapped.Report(value);
             }
         }
