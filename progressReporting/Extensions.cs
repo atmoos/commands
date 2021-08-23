@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace progressReporting
@@ -25,5 +26,7 @@ namespace progressReporting
         public static IMonotonicBuilder<Double> Monotonic(this IProgress<Double> progress) => new MonotonicBuilder(progress);
         public static IMonotonicBuilder<TProgress> Monotonic<TProgress>(this IProgress<TProgress> progress)
             where TProgress : IComparable<TProgress> => new MonotonicBuilder<TProgress>(progress);
+        public static IEnumerable<IProgress<TProgress>> InParallel<TProgress>(this IProgress<TProgress> target, Int32 concurrencyLevel)
+            where TProgress : struct, IComparable<TProgress> => ParallelProgress<TProgress>.FanOut(target, concurrencyLevel);
     }
 }
