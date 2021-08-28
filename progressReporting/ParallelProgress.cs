@@ -28,11 +28,12 @@ namespace progressReporting
             }
         }
 
-        public static IEnumerable<IProgress<T>> FanOut(IProgress<T> target, Int32 concurrencyLevel) => concurrencyLevel switch
-        {
-            > 1 => new ParallelProgress<T>(target, concurrencyLevel).receivers,
-            _ => new[] { target }
-        };
+        public static IEnumerable<IProgress<T>> FanOut(IProgress<T> target, Int32 concurrencyLevel)
+            => concurrencyLevel switch
+            {
+                > 1 => new ParallelProgress<T>(target, concurrencyLevel).receivers,
+                _ => new[] { target }
+            };
 
         private sealed class ProgressReceiver : IProgress<T>
         {
@@ -53,6 +54,9 @@ namespace progressReporting
             }
         }
 
+        // To avoid having to use a locking mechanism, we wrap
+        // reported values (structs) in a class, that we can atomically
+        // exchange. This gives us good enough thread safe reporting consistency.
         private sealed class Current
         {
             public T Value { get; }
