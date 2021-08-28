@@ -25,10 +25,12 @@ namespace progressTree
         public Reporter Schedule(TimeSpan expectedDuration, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(expectedDuration), subProgress);
         public Reporter Schedule<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress) => Chain(ProgressDriver.Create(target, nlProgress));
         public Reporter Schedule<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(target, nlProgress), subProgress);
+        public ConcurrentReporter Concurrent(Int32 concurrencyLevel) => new(Schedule(1), in concurrencyLevel);
+        public ConcurrentReporter Concurrent(Int32 concurrencyLevel, IProgress<Double> subProgress) => new(Schedule(1, subProgress), in concurrencyLevel);
         public static Progress Create(IProgress<Double> progress) => new(Guard(progress));
+        internal Reporter Exchange(Reporter next) => Interlocked.Exchange(ref this.current, next);
         private Reporter Chain(ProgressDriver driver) => this.createNext(driver, this.current.Progress);
         private Reporter Branch(ProgressDriver driver, IProgress<Double> progress) => this.createNext(driver, Guard(this.current.Progress.Zip(progress)));
-        internal Reporter Exchange(Reporter next) => Interlocked.Exchange(ref this.current, next);
         private Reporter CreateReporter(ProgressDriver driver, IProgress<Double> progress) => new(this, driver, progress);
         private Reporter KeepCurrent(ProgressDriver _, IProgress<Double> __) => this.current;
         private static IProgress<Double> Guard(IProgress<Double> progress) => progress.Monotonic().Strictly.Increasing().Bounded(0, 1).Inclusive();

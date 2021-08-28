@@ -266,6 +266,46 @@ namespace progressTreeTest
             Assert.Contains(1d, this.actualProgress);
         }
 
+        [Fact]
+        public void ConcurrentProgress_IsOnlyReportedFromTheSlowestInstance_ToReportProgress()
+        {
+            const Int32 reportCount = 8;
+            var rootProgress = Progress.Create(this.actualProgress);
+
+            using(var concurrentProgress = rootProgress.Concurrent(2)) {
+                // reports from the first progress instance that is used are ignored
+                var firstInstanceToReport = concurrentProgress[1];
+                GenerateProgress(firstInstanceToReport, 6);
+                // because overall progress can't be faster than the minimum of the last incoming report
+                // Which in this case are all from the second instance that is used for reporting.
+                var secondInstanceToReport = concurrentProgress[1];
+                GenerateProgress(secondInstanceToReport, reportCount);
+            }
+
+            var expectedProgress = ExpectedProgress(reportCount);
+            Assert.Equal(expectedProgress, this.actualProgress);
+        }
+
+        [Fact]
+        public void ConcurrentProgress_IsOnlyReportedFromTheSmallestValueThatIsReported()
+        {
+            const Int32 reportCount = 8;
+            var rootProgress = Progress.Create(this.actualProgress);
+
+            using(var concurrentProgress = rootProgress.Concurrent(2)) {
+                // reports from the first progress instance that is used are ignored
+                var firstInstanceToReport = concurrentProgress[1];
+                GenerateProgress(firstInstanceToReport, 6);
+                // because overall progress can't be faster than the minimum of the last incoming report
+                // Which in this case are all from the second instance that is used for reporting.
+                var secondInstanceToReport = concurrentProgress[1];
+                GenerateProgress(secondInstanceToReport, reportCount);
+            }
+
+            var expectedProgress = ExpectedProgress(reportCount);
+            Assert.Equal(expectedProgress, this.actualProgress);
+        }
+
         private static void RunTreeComparison(params Int32[] tree)
         {
             var actual = new ProgressRecorder<Double>();

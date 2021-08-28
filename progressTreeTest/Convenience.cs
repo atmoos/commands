@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using progressReporting;
 using progressTree;
 
@@ -20,6 +21,16 @@ namespace progressTreeTest
         {
             using(Reporter reporter = progress.Schedule(iterations)) {
                 foreach(var _ in Range(0, iterations)) {
+                    reporter.Report();
+                }
+            }
+        }
+        public static async Task GenerateProgress(Progress progress, TimeSpan duration, Int32 intervals)
+        {
+            var interval = duration / intervals;
+            using(Reporter reporter = progress.Schedule(duration)) {
+                foreach(var _ in Range(0, intervals)) {
+                    await Task.Delay(interval).ConfigureAwait(false);
                     reporter.Report();
                 }
             }
