@@ -16,7 +16,9 @@ namespace progressReportingTest
         public ParallelProgressTest()
         {
             var targetProgress = new ProgressRecorder<Int32>();
-            var progress = targetProgress.Concurrent(3).ToArray();
+            // The tests are easier to understand, when we limit the expected values
+            // to monotonically increasing ones.
+            var progress = targetProgress.Monotonic().Strictly.Increasing().Concurrent(3).ToArray();
 
             this.progA = progress[0];
             this.progB = progress[1];
