@@ -17,6 +17,14 @@ namespace progressTreeTest
             var interval = (end - start) / intervals;
             return Range(0, intervals + 1).Select(index => start + (interval * index));
         }
+        public static IEnumerable<Double> ExpectedProgress(params Double[] intermediateValues)
+        {
+            yield return 0;
+            foreach(var intermediateValue in intermediateValues) {
+                yield return intermediateValue;
+            }
+            yield return 1;
+        }
         public static void GenerateProgress(Progress progress, Int32 iterations)
         {
             using(Reporter reporter = progress.Schedule(iterations)) {

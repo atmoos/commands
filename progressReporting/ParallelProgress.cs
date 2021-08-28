@@ -18,20 +18,16 @@ namespace progressReporting
         }
         private void Report(in T value)
         {
-            Int32 minComparison;
-            var currentState = this.receivers.Select(i => i.Current).OrderBy(c => c).Take(2).ToArray();
-            var (minValue, secondToMin) = (currentState[0], currentState[1]);
-            if((minComparison = minValue.CompareTo(value)) <= 0) {
-                if(minComparison == 0 || value.CompareTo(secondToMin) <= 0) {
-                    this.root.Report(value);
-                }
+            var minValue = this.receivers.Min(i => i.Current);
+            if(minValue.CompareTo(value) <= 0) {
+                this.root.Report(minValue);
             }
         }
 
         public static IEnumerable<IProgress<T>> FanOut(IProgress<T> target, Int32 concurrencyLevel)
             => concurrencyLevel switch
             {
-                > 1 => new ParallelProgress<T>(target, concurrencyLevel).receivers,
+                > 1 => new ParallelProgress<T>(target.Monotonic().Strictly.Increasing(), concurrencyLevel).receivers,
                 _ => new[] { target }
             };
 
@@ -49,8 +45,8 @@ namespace progressReporting
 
             void IProgress<T>.Report(T value)
             {
-                this.parent.Report(in value);
                 Interlocked.Exchange(ref this.current, new Current(value));
+                this.parent.Report(in value);
             }
         }
 
