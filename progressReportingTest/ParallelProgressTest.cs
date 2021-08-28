@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using progressReporting;
 using Xunit;
@@ -18,7 +17,7 @@ namespace progressReportingTest
         public ParallelProgressTest()
         {
             var targetProgress = new ProgressRecorder<Int32>();
-            var progress = targetProgress.ForConcurrencyLevel(3).ToArray();
+            var progress = targetProgress.Concurrent(3).ToArray();
 
             this.progA = progress[0];
             this.progB = progress[1];
@@ -93,7 +92,7 @@ namespace progressReportingTest
         {
             var expectedValue = Guid.NewGuid();
             var expectedTargetProgress = new ProgressRecorder<Guid>();
-            var parallelProgressInstances = expectedTargetProgress.ForConcurrencyLevel(degenerateConcurrencyLevel);
+            var parallelProgressInstances = expectedTargetProgress.Concurrent(degenerateConcurrencyLevel);
 
             var actualSingleWrappedParallelInstance = parallelProgressInstances.Single();
             actualSingleWrappedParallelInstance.Report(expectedValue);
@@ -104,63 +103,11 @@ namespace progressReportingTest
             Assert.Same(expectedTargetProgress, actualSingleWrappedParallelInstance);
         }
 
-        [Fact]
-        public async Task ReportsAreNotLost_WhenTargetProgressBlocks()
-        {
-            const Int32 reportCount = 3;
-            const Int32 initialReport = 1;
-            const Int32 concurrencyLevel = 2;
-
-            static void Report(IProgress<Int32> progress, Int32 count)
-            {
-                foreach(var value in Enumerable.Range(initialReport, count)) {
-                    progress.Report(value);
-                }
-            }
-
-            var parentProgress = new ProgressRecorder<Int32>();
-            var siblingRecorders = Enumerable.Range(0, concurrencyLevel).Select(_ => new ProgressRecorder<Int32>()).ToArray();
-            using var blockingProgress = new BlockingProgress(parentProgress);
-            var parallelReporters = blockingProgress.ForConcurrencyLevel(2).Select((p, i) => p.Zip(siblingRecorders[i])).ToArray();
-
-            blockingProgress.Block();
-            var parallelReports = parallelReporters.Select(p => Task.Run(() => Report(p, reportCount))).ToArray();
-
-            var expectedParentProgress = Array.Empty<Int32>();
-            var expectedSiblingProgress = new[] { initialReport };
-            foreach(var siblingProgress in siblingRecorders) {
-                Assert.Equal(expectedSiblingProgress, siblingProgress);
-            }
-            Assert.Equal(expectedParentProgress, parentProgress); // Sanity check
-            blockingProgress.Unblock();
-            await Task.WhenAll(parallelReports).ConfigureAwait(false);
-        }
-
         private void ReportAll(Int32 value)
         {
             this.progA.Report(value);
             this.progB.Report(value);
             this.progC.Report(value);
-        }
-
-        private sealed class BlockingProgress : IProgress<Int32>, IDisposable
-        {
-            private readonly IProgress<Int32> parent;
-            private readonly SemaphoreSlim block = new(1);
-            public BlockingProgress(IProgress<Int32> parent) => this.parent = parent;
-            public void Report(Int32 value)
-            {
-                Block();
-                try {
-                    this.parent.Report(value);
-                } finally {
-                    Unblock();
-                }
-            }
-            public void Block() => this.block.Wait();
-            public void Unblock() => this.block.Release();
-
-            void IDisposable.Dispose() => this.block.Dispose();
         }
     }
 }
