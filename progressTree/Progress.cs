@@ -25,8 +25,6 @@ namespace progressTree
         public Reporter Schedule(TimeSpan expectedDuration, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(expectedDuration), subProgress);
         public Reporter Schedule<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress) => Chain(ProgressDriver.Create(target, nlProgress));
         public Reporter Schedule<TProgress>(TProgress target, INonLinearProgress<TProgress> nlProgress, IProgress<Double> subProgress) => Branch(ProgressDriver.Create(target, nlProgress), subProgress);
-        public ConcurrentReporter Concurrent(Int32 concurrencyLevel) => new(Schedule(1), in concurrencyLevel);
-        public ConcurrentReporter Concurrent(Int32 concurrencyLevel, IProgress<Double> subProgress) => new(Schedule(1, subProgress), in concurrencyLevel);
         public static Progress Create(IProgress<Double> progress) => new(Guard(progress));
         internal Reporter Exchange(Reporter next) => Interlocked.Exchange(ref this.current, next);
         private Reporter Chain(ProgressDriver driver) => this.createNext(driver, this.current.Progress);

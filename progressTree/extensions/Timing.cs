@@ -36,7 +36,7 @@ namespace progressTree.extensions
         public TimerStream(TimeSpan interval)
         {
             if(interval <= TimeSpan.Zero) {
-                throw new ArgumentOutOfRangeException($"Interval must be in the half open interval of ]0, ∞[. Received: {interval:g}");
+                throw new ArgumentOutOfRangeException(nameof(interval), interval, $"The parameter {nameof(interval)} must be in the open interval of ]0, ∞[. Received: {interval:g}");
             }
             this.interval = interval.Ticks;
         }
