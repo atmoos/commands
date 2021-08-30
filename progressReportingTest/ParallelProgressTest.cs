@@ -18,7 +18,7 @@ namespace progressReportingTest
             var targetProgress = new ProgressRecorder<Int32>();
             // The tests are easier to understand, when we limit the expected values
             // to monotonically increasing ones.
-            var progress = targetProgress.Monotonic().Strictly.Increasing().Concurrent(3).ToArray();
+            var progress = targetProgress.Monotonic().Strictly.Increasing().Concurrent(Norm.Min, 3).ToArray();
 
             this.progA = progress[0];
             this.progB = progress[1];
@@ -111,7 +111,7 @@ namespace progressReportingTest
             var expectedValue = Guid.NewGuid();
             const Int32 degenerateConcurrencyLevel = 1;
             var expectedTargetProgress = new ProgressRecorder<Guid>();
-            var parallelProgressInstances = expectedTargetProgress.Concurrent(degenerateConcurrencyLevel);
+            var parallelProgressInstances = expectedTargetProgress.Concurrent(Norm.Min, degenerateConcurrencyLevel);
 
             var actualSingleWrappedParallelInstance = parallelProgressInstances.Single();
             actualSingleWrappedParallelInstance.Report(expectedValue);

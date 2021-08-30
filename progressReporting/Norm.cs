@@ -3,6 +3,11 @@ using System.Collections.Generic;
 
 namespace progressReporting
 {
+    public static class Norm
+    {
+        public static Norm<T> Max<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Max(progress);
+        public static Norm<T> Min<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Min(progress);
+    }
     public sealed class Norm<T>
         where T : IComparable<T>
     {
@@ -23,8 +28,8 @@ namespace progressReporting
                 this.progress.Report(norm);
             }
         }
-        public static Norm<T> Max(IProgress<T> progress) => new(progress, Maximum);
-        public static Norm<T> Min(IProgress<T> progress) => new(progress, Minimum);
+        internal static Norm<T> Max(IProgress<T> progress) => new(progress, Maximum);
+        internal static Norm<T> Min(IProgress<T> progress) => new(progress, Minimum);
         private static T Maximum(in T current, IEnumerable<T> previous)
         {
             var norm = current;

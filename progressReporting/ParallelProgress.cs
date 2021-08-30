@@ -18,9 +18,9 @@ namespace progressReporting
         }
         private void Report(in TProgress value) => this.norm.Update(value, this.receivers.Select(r => r.Current));
 
-        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(IProgress<TProgress> target, IEnumerable<TItem> items)
+        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(Norm<TProgress> norm, IEnumerable<TItem> items)
         {
-            var parent = new ParallelProgress<TProgress>(Norm<TProgress>.Min(target));
+            var parent = new ParallelProgress<TProgress>(norm);
             return items.Select<TItem, (IProgress<TProgress>, TItem)>(i => (new ProgressReceiver(parent), i)).ToList(); // ToDo! ToList?
         }
 
