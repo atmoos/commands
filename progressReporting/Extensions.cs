@@ -31,6 +31,6 @@ namespace progressReporting
         public static IEnumerable<IProgress<TProgress>> Concurrent<TProgress>(this IProgress<TProgress> target, Int32 concurrencyLevel)
             where TProgress : struct, IComparable<TProgress> => target.Concurrent(Enumerable.Range(0, concurrencyLevel)).Select(p => p.progress);
         public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Concurrent<TProgress, TItem>(this IProgress<TProgress> target, IEnumerable<TItem> items)
-            where TProgress : struct, IComparable<TProgress> => ParallelProgress<TProgress, TItem>.Create(target, items);
+            where TProgress : struct, IComparable<TProgress> => ParallelProgress<TProgress>.Create(target, items);
     }
 }

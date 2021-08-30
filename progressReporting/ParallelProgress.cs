@@ -5,44 +5,36 @@ using System.Threading;
 
 namespace progressReporting
 {
-    internal sealed class ParallelProgress<TProgress, TItem>
+    internal sealed class ParallelProgress<TProgress>
      where TProgress : struct, IComparable<TProgress>
     {
-        private readonly IProgress<TProgress> root;
-        private readonly ProgressReceiver[] receivers;
+        private readonly Norm<TProgress> norm;
+        private readonly List<ProgressReceiver> receivers;
 
-        private ParallelProgress(IProgress<TProgress> root, IEnumerable<TItem> items)
+        private ParallelProgress(Norm<TProgress> norm)
         {
-            this.root = root;
-            this.receivers = items.Select(item => new ProgressReceiver(this, item)).ToArray();
+            this.norm = norm;
+            this.receivers = new List<ProgressReceiver>();
         }
-        private void Report(in TProgress value)
-        {
-            var minValue = this.receivers.Min(r => r.Current);
-            if(minValue.CompareTo(value) <= 0) {
-                this.root.Report(minValue);
-            }
-        }
+        private void Report(in TProgress value) => this.norm.Update(value, this.receivers.Select(r => r.Current));
 
-        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create(IProgress<TProgress> target, IEnumerable<TItem> items)
+        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(IProgress<TProgress> target, IEnumerable<TItem> items)
         {
-            var parallelProgress = new ParallelProgress<TProgress, TItem>(target, items).receivers;
-            return parallelProgress.Select<ProgressReceiver, (IProgress<TProgress>, TItem)>(p => (p, p.Item));
+            var parent = new ParallelProgress<TProgress>(Norm<TProgress>.Min(target));
+            return items.Select<TItem, (IProgress<TProgress>, TItem)>(i => (new ProgressReceiver(parent), i)).ToList(); // ToDo! ToList?
         }
 
         private sealed class ProgressReceiver : IProgress<TProgress>
         {
-            private readonly ParallelProgress<TProgress, TItem> parent;
+            private readonly ParallelProgress<TProgress> parent;
             private Current current;
             public TProgress Current => this.current.Value;
 
-            public TItem Item { get; }
-
-            public ProgressReceiver(ParallelProgress<TProgress, TItem> parent, TItem item)
+            public ProgressReceiver(ParallelProgress<TProgress> parent)
             {
                 this.parent = parent;
                 this.current = new Current(default);
-                Item = item;
+                parent.receivers.Add(this);
             }
 
             void IProgress<TProgress>.Report(TProgress value)
