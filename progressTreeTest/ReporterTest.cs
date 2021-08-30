@@ -34,8 +34,9 @@ namespace progressTreeTest
         [Fact]
         public void ResetIsPerformedUponDisposal()
         {
+            var someNonNullReporter = this.reporter;
             this.reporter.Dispose();
-            Assert.NotEqual(this.root.Exchange(null), this.reporter);
+            Assert.NotEqual(this.root.Exchange(someNonNullReporter), this.reporter);
         }
         [Fact]
         public void ReportAdvancesProgress()

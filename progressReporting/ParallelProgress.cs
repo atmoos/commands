@@ -5,17 +5,18 @@ using System.Threading;
 
 namespace progressReporting
 {
-    internal sealed class ParallelProgress<T>
-     where T : struct, IComparable<T>
+    internal sealed class ParallelProgress<TProgress, TItem>
+     where TProgress : struct, IComparable<TProgress>
     {
-        private readonly IProgress<T> root;
+        private readonly IProgress<TProgress> root;
         private readonly ProgressReceiver[] receivers;
-        private ParallelProgress(IProgress<T> root, Int32 concurrencyLevel)
+
+        private ParallelProgress(IProgress<TProgress> root, IEnumerable<TItem> items)
         {
             this.root = root;
-            this.receivers = Enumerable.Range(0, concurrencyLevel).Select(_ => new ProgressReceiver(this)).ToArray();
+            this.receivers = items.Select(item => new ProgressReceiver(this, item)).ToArray();
         }
-        private void Report(in T value)
+        private void Report(in TProgress value)
         {
             var minValue = this.receivers.Min(r => r.Current);
             if(minValue.CompareTo(value) <= 0) {
@@ -23,26 +24,28 @@ namespace progressReporting
             }
         }
 
-        public static IEnumerable<IProgress<T>> FanOut(IProgress<T> target, Int32 concurrencyLevel)
-            => concurrencyLevel switch
-            {
-                > 1 => new ParallelProgress<T>(target, concurrencyLevel).receivers,
-                _ => new[] { target }
-            };
-
-        private sealed class ProgressReceiver : IProgress<T>
+        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create(IProgress<TProgress> target, IEnumerable<TItem> items)
         {
-            private readonly ParallelProgress<T> parent;
-            private Current current;
-            public T Current => this.current.Value;
+            var parallelProgress = new ParallelProgress<TProgress, TItem>(target, items).receivers;
+            return parallelProgress.Select<ProgressReceiver, (IProgress<TProgress>, TItem)>(p => (p, p.Item));
+        }
 
-            public ProgressReceiver(ParallelProgress<T> parent)
+        private sealed class ProgressReceiver : IProgress<TProgress>
+        {
+            private readonly ParallelProgress<TProgress, TItem> parent;
+            private Current current;
+            public TProgress Current => this.current.Value;
+
+            public TItem Item { get; }
+
+            public ProgressReceiver(ParallelProgress<TProgress, TItem> parent, TItem item)
             {
                 this.parent = parent;
                 this.current = new Current(default);
+                Item = item;
             }
 
-            void IProgress<T>.Report(T value)
+            void IProgress<TProgress>.Report(TProgress value)
             {
                 Interlocked.Exchange(ref this.current, new Current(value));
                 this.parent.Report(in value);
@@ -54,8 +57,8 @@ namespace progressReporting
         // exchange. This gives us good enough thread safe reporting consistency.
         private sealed class Current
         {
-            public T Value { get; }
-            public Current(T value) => Value = value;
+            public TProgress Value { get; }
+            public Current(TProgress value) => Value = value;
         }
     }
 }

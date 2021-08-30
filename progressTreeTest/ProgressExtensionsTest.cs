@@ -1,4 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Threading.Tasks;
 using progressReporting;
 using progressTree;
 using Xunit;
@@ -51,6 +55,17 @@ namespace progressTreeTest
 
             var expectedProgress = ExpectedProgress(0.2, 0.25, 0.4);
             Assert.Equal(expectedProgress, this.actualProgress);
+        }
+
+        [Fact]
+        public void ConcurrentProgress_OnSequenceOfItems_RetainsInitialSequence()
+        {
+            var rootProgress = Progress.Create(this.actualProgress);
+            var actualSequence = Enumerable.Range(0, 7).Select(_ => new Object()).ToList();
+
+            using(var concurrentProgress = rootProgress.Concurrent(actualSequence)) {
+                Assert.Equal(actualSequence, concurrentProgress.Select(v => v.item));
+            }
         }
     }
 }

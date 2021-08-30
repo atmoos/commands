@@ -24,4 +24,21 @@ namespace progressTree
 
         public void Dispose() => this.parent.Dispose();
     }
+
+    public sealed class ConcurrentReporter<T> : IEnumerable<(T item, Progress progress)>, IDisposable
+    {
+        private readonly Reporter parent;
+        private readonly List<(T item, Progress progress)> concurrentProgress;
+        internal ConcurrentReporter(Reporter parent, IEnumerable<T> items)
+        {
+            this.parent = parent;
+            this.concurrentProgress = parent.Export().Concurrent(items).Select(v => (v.item, Progress.Create(v.progress))).ToList();
+        }
+
+        public IEnumerator<(T item, Progress progress)> GetEnumerator() => this.concurrentProgress.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+        public void Dispose() => this.parent.Dispose();
+    }
 }

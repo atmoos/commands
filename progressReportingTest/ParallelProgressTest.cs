@@ -105,12 +105,11 @@ namespace progressReportingTest
             Assert.Equal(expectation, this.actualProgress);
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(1)]
-        public void ProgressIsReportedDirectlyToTarget_WhenConcurrencyLevelIsDegenerate(Int32 degenerateConcurrencyLevel)
+        [Fact]
+        public void ProgressIsReportedDirectlyToTarget_WhenConcurrencyLevelIsDegenerate()
         {
             var expectedValue = Guid.NewGuid();
+            const Int32 degenerateConcurrencyLevel = 1;
             var expectedTargetProgress = new ProgressRecorder<Guid>();
             var parallelProgressInstances = expectedTargetProgress.Concurrent(degenerateConcurrencyLevel);
 
@@ -119,8 +118,6 @@ namespace progressReportingTest
 
             // All values will be reported no matter what, when degenerate concurrency occurs!
             Assert.Equal(new[] { expectedValue }, expectedTargetProgress);
-            // implementation detail:
-            Assert.Same(expectedTargetProgress, actualSingleWrappedParallelInstance);
         }
 
         private void ReportAll(Int32 value)
