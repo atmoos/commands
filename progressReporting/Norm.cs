@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace progressReporting
 {
+    public delegate Norm<T> CreateNorm<T>(IProgress<T> progress) where T : IComparable<T>;
     public static class Norm
     {
         public static Norm<T> Max<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Max(progress);
