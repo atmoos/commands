@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace progressReporting
+namespace progressReporting.concurrent
 {
     internal sealed class ParallelProgress<TProgress>
      where TProgress : struct, IComparable<TProgress>

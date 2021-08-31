@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using progressReporting;
+using progressReporting.concurrent;
 using progressTree;
 using Xunit;
 

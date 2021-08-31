@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace progressReporting
+namespace progressReporting.concurrent
 {
     public delegate Norm<T> CreateNorm<T>(IProgress<T> progress) where T : IComparable<T>;
     public static class Norm

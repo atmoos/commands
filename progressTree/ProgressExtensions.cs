@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using progressReporting;
+using progressReporting.concurrent;
 
 namespace progressTree
 {
