@@ -6,19 +6,17 @@ using System.Threading;
 namespace progressReporting.concurrent
 {
     internal sealed class ParallelProgress<TProgress>
-     where TProgress : struct, IComparable<TProgress>
+     where TProgress : struct
     {
-        private readonly Norm<TProgress> norm;
+        private readonly INorm<TProgress> norm;
         private readonly List<ProgressReceiver> receivers;
-
-        private ParallelProgress(Norm<TProgress> norm)
+        private ParallelProgress(INorm<TProgress> norm)
         {
             this.norm = norm;
             this.receivers = new List<ProgressReceiver>();
         }
         private void Report(in TProgress value) => this.norm.Update(value, this.receivers.Select(r => r.Current));
-
-        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(Norm<TProgress> norm, IEnumerable<TItem> items)
+        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(INorm<TProgress> norm, IEnumerable<TItem> items)
         {
             var parent = new ParallelProgress<TProgress>(norm);
             return items.Select<TItem, (IProgress<TProgress>, TItem)>(i => (new ProgressReceiver(parent), i)).ToList(); // ToDo! ToList?
@@ -29,14 +27,12 @@ namespace progressReporting.concurrent
             private readonly ParallelProgress<TProgress> parent;
             private Current current;
             public TProgress Current => this.current.Value;
-
             public ProgressReceiver(ParallelProgress<TProgress> parent)
             {
                 this.parent = parent;
                 this.current = new Current(default);
                 parent.receivers.Add(this);
             }
-
             void IProgress<TProgress>.Report(TProgress value)
             {
                 Interlocked.Exchange(ref this.current, new Current(value));

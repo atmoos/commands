@@ -3,28 +3,27 @@ using System.Collections.Generic;
 
 namespace progressReporting.concurrent
 {
-    public delegate Norm<T> CreateNorm<T>(IProgress<T> progress) where T : IComparable<T>;
+    public delegate INorm<T> CreateNorm<T>(IProgress<T> progress);
     public static class Norm
     {
-        public static Norm<T> Max<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Max(progress);
-        public static Norm<T> Min<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Min(progress);
+        public static INorm<T> Max<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Max(progress);
+        public static INorm<T> Min<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Min(progress);
     }
-    public sealed class Norm<T>
+    internal sealed class Norm<T> : INorm<T>
         where T : IComparable<T>
     {
-        private delegate T Select(in T current, IEnumerable<T> previous);
-        private readonly Select selectNorm;
+        private delegate T Compute(in T current, IEnumerable<T> previous);
+        private readonly Compute computeNorm;
         private readonly IProgress<T> progress;
-
-        private Norm(IProgress<T> progress, Select selectNorm)
+        private Norm(IProgress<T> progress, Compute selectNorm)
         {
             this.progress = progress;
-            this.selectNorm = selectNorm;
+            this.computeNorm = selectNorm;
         }
 
-        internal void Update(in T current, IEnumerable<T> others)
+        public void Update(in T current, IEnumerable<T> others)
         {
-            var norm = this.selectNorm(in current, others);
+            var norm = this.computeNorm(in current, others);
             if(norm.CompareTo(current) <= 0) {
                 this.progress.Report(norm);
             }
