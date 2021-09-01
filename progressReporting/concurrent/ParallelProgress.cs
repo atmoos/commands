@@ -8,18 +8,21 @@ namespace progressReporting.concurrent
     internal sealed class ParallelProgress<TProgress>
      where TProgress : struct
     {
-        private readonly INorm<TProgress> norm;
+        private readonly Norm<TProgress> norm;
+        private readonly IProgress<TProgress> progress;
         private readonly List<ProgressReceiver> receivers;
-        private ParallelProgress(INorm<TProgress> norm)
+
+        private ParallelProgress(IProgress<TProgress> progress, Norm<TProgress> norm)
         {
             this.norm = norm;
+            this.progress = progress;
             this.receivers = new List<ProgressReceiver>();
         }
-        private void Report(in TProgress value) => this.norm.Update(in value, this.receivers.Select(r => r.Current));
-        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(INorm<TProgress> norm, IEnumerable<TItem> items)
+        private void Report(in TProgress value) => this.progress.Report(this.norm(in value, this.receivers.Select(r => r.Current)));
+        internal static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(IProgress<TProgress> progress, Norm<TProgress> norm, IEnumerable<TItem> items)
         {
-            var parent = new ParallelProgress<TProgress>(norm);
-            return items.Select<TItem, (IProgress<TProgress>, TItem)>(i => (new ProgressReceiver(parent), i)).ToList(); // ToDo! ToList?
+            var parent = new ParallelProgress<TProgress>(progress, norm);
+            return items.Select<TItem, (IProgress<TProgress>, TItem)>(i => (new ProgressReceiver(parent), i)).ToList();
         }
 
         private sealed class ProgressReceiver : IProgress<TProgress>

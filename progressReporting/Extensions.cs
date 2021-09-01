@@ -29,9 +29,9 @@ namespace progressReporting
         public static IMonotonicBuilder<Double> Monotonic(this IProgress<Double> progress) => new MonotonicBuilder(progress);
         public static IMonotonicBuilder<TProgress> Monotonic<TProgress>(this IProgress<TProgress> progress)
             where TProgress : IComparable<TProgress> => new MonotonicBuilder<TProgress>(progress);
-        public static IEnumerable<IProgress<TProgress>> Concurrent<TProgress>(this IProgress<TProgress> target, CreateNorm<TProgress> norm, Int32 concurrencyLevel)
+        public static IEnumerable<IProgress<TProgress>> Concurrent<TProgress>(this IProgress<TProgress> target, Norm<TProgress> norm, Int32 concurrencyLevel)
             where TProgress : struct => target.Concurrent(norm, Enumerable.Range(0, concurrencyLevel)).Select(p => p.progress);
-        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Concurrent<TProgress, TItem>(this IProgress<TProgress> target, CreateNorm<TProgress> norm, IEnumerable<TItem> items)
-            where TProgress : struct => ParallelProgress<TProgress>.Create(norm(target), items);
+        public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Concurrent<TProgress, TItem>(this IProgress<TProgress> target, Norm<TProgress> norm, IEnumerable<TItem> items)
+            where TProgress : struct => ParallelProgress<TProgress>.Create(target, norm, items);
     }
 }

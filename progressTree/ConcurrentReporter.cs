@@ -13,7 +13,7 @@ namespace progressTree
         private readonly List<Progress> concurrentProgress;
         public Progress this[Int32 index] => this.concurrentProgress[index];
         public Int32 Count => this.concurrentProgress.Count;
-        internal ConcurrentReporter(Reporter parent, CreateNorm<Double> norm, in Int32 concurrencyLevel)
+        internal ConcurrentReporter(Reporter parent, Norm<Double> norm, in Int32 concurrencyLevel)
         {
             this.parent = parent;
             this.concurrentProgress = parent.Export().Concurrent(norm, concurrencyLevel).Select(Progress.Create).ToList();
@@ -30,7 +30,7 @@ namespace progressTree
     {
         private readonly Reporter parent;
         private readonly List<(T item, Progress progress)> concurrentProgress;
-        internal ConcurrentReporter(Reporter parent, CreateNorm<Double> norm, IEnumerable<T> items)
+        internal ConcurrentReporter(Reporter parent, Norm<Double> norm, IEnumerable<T> items)
         {
             this.parent = parent;
             this.concurrentProgress = parent.Export().Concurrent(norm, items).Select(v => (v.item, Progress.Create(v.progress))).ToList();
