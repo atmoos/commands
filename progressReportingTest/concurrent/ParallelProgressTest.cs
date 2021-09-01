@@ -5,7 +5,7 @@ using progressReporting;
 using progressReporting.concurrent;
 using Xunit;
 
-namespace progressReportingTest
+namespace progressReportingTest.concurrent
 {
     public sealed class ParallelProgressTest
     {
@@ -68,7 +68,7 @@ namespace progressReportingTest
         public void MinimalValueFromAllInstancesIsReported_WhenOtherReportsOneHigher()
         {
             var expectation = new Expectation<Int32>();
-            this.ReportAll(expectation.Add(default));
+            ReportAll(expectation.Add(default));
             this.progC.Report(23); // ignore progC in this test...
             this.progA.Report(4);
             this.progB.Report(expectation.Add(1));
@@ -118,7 +118,7 @@ namespace progressReportingTest
             actualSingleWrappedParallelInstance.Report(expectedValue);
 
             // All values will be reported no matter what, when degenerate concurrency occurs!
-            Assert.Equal(new[] { expectedValue }, expectedTargetProgress);
+            Assert.Single(expectedTargetProgress, v => v == expectedValue);
         }
 
         private void ReportAll(Int32 value)

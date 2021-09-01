@@ -15,7 +15,7 @@ namespace progressReporting.concurrent
             this.norm = norm;
             this.receivers = new List<ProgressReceiver>();
         }
-        private void Report(in TProgress value) => this.norm.Update(value, this.receivers.Select(r => r.Current));
+        private void Report(in TProgress value) => this.norm.Update(in value, this.receivers.Select(r => r.Current));
         public static IEnumerable<(IProgress<TProgress> progress, TItem item)> Create<TItem>(INorm<TProgress> norm, IEnumerable<TItem> items)
         {
             var parent = new ParallelProgress<TProgress>(norm);

@@ -3,48 +3,52 @@ using System.Collections.Generic;
 
 namespace progressReporting.concurrent
 {
-    public delegate INorm<T> CreateNorm<T>(IProgress<T> progress);
+    public delegate INorm<TProgress> CreateNorm<TProgress>(IProgress<TProgress> progress);
     public static class Norm
     {
-        public static INorm<T> Max<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Max(progress);
-        public static INorm<T> Min<T>(IProgress<T> progress) where T : IComparable<T> => Norm<T>.Min(progress);
+        public static INorm<TProgress> Max<TProgress>(IProgress<TProgress> progress) where TProgress : IComparable<TProgress> => new MaxNorm<TProgress>(progress);
+        public static INorm<TProgress> Min<TProgress>(IProgress<TProgress> progress) where TProgress : IComparable<TProgress> => new MinNorm<TProgress>(progress);
     }
-    internal sealed class Norm<T> : INorm<T>
-        where T : IComparable<T>
+    internal sealed class MinNorm<TProgress> : INorm<TProgress>
+        where TProgress : IComparable<TProgress>
     {
-        private delegate T Compute(in T current, IEnumerable<T> previous);
-        private readonly Compute computeNorm;
-        private readonly IProgress<T> progress;
-        private Norm(IProgress<T> progress, Compute selectNorm)
+        private readonly IProgress<TProgress> progress;
+        internal MinNorm(IProgress<TProgress> progress) => this.progress = progress;
+        public void Update(in TProgress current, IEnumerable<TProgress> others)
         {
-            this.progress = progress;
-            this.computeNorm = selectNorm;
-        }
-
-        public void Update(in T current, IEnumerable<T> others)
-        {
-            var norm = this.computeNorm(in current, others);
-            if(norm.CompareTo(current) <= 0) {
-                this.progress.Report(norm);
+            var min = Minimum(in current, in others);
+            if(min.CompareTo(current) <= 0) {
+                this.progress.Report(min);
             }
         }
-        internal static Norm<T> Max(IProgress<T> progress) => new(progress, Maximum);
-        internal static Norm<T> Min(IProgress<T> progress) => new(progress, Minimum);
-        private static T Maximum(in T current, IEnumerable<T> previous)
+        private static TProgress Minimum(in TProgress current, in IEnumerable<TProgress> previous)
         {
             var norm = current;
             foreach(var candidate in previous) {
-                if(norm.CompareTo(candidate) < 0) {
+                if(candidate.CompareTo(norm) < 0) {
                     norm = candidate;
                 }
             }
             return norm;
         }
-        private static T Minimum(in T current, IEnumerable<T> previous)
+    }
+    internal sealed class MaxNorm<TProgress> : INorm<TProgress>
+    where TProgress : IComparable<TProgress>
+    {
+        private readonly IProgress<TProgress> progress;
+        internal MaxNorm(IProgress<TProgress> progress) => this.progress = progress;
+        public void Update(in TProgress current, IEnumerable<TProgress> others)
+        {
+            var max = Maximum(in current, in others);
+            if(current.CompareTo(max) <= 0) {
+                this.progress.Report(max);
+            }
+        }
+        private static TProgress Maximum(in TProgress current, in IEnumerable<TProgress> previous)
         {
             var norm = current;
             foreach(var candidate in previous) {
-                if(candidate.CompareTo(norm) < 0) {
+                if(norm.CompareTo(candidate) < 0) {
                     norm = candidate;
                 }
             }
