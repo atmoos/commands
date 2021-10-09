@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\progressReporting\progressReporting.csproj" />
+    <PackageReference Include="Atmoos.Progress.Reporting" Version="0.1.0" />
   </ItemGroup>
 
 </Project>

@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\progressTree\progressTree.csproj" />
-    <ProjectReference Include="..\progressReporting\progressReporting.csproj" />
   </ItemGroup>
 
 </Project>
