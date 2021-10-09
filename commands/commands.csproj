@@ -1,12 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <ItemGroup>
-    <ProjectReference Include="..\progressTree\progressTree.csproj" />
-  </ItemGroup>
+  <Import Project="../commands.pack.xml"/>
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageId>Atmoos.Commands</PackageId>
+    <Description>Command library enabling command chaining, including typesafe propagation of command in- and outputs. Reliable progress reporting is built in.</Description>
+    <PackageTags>command, commands, command pattern, command chain, command sequence, asynchronous command, typesafe input, typesafe output</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\progressTree\progressTree.csproj" />
+  </ItemGroup>
 </Project>

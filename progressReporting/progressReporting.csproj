@@ -1,7 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../commands.pack.xml"/>
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <PackageId>Atmoos.Progress.Reporting</PackageId>
+    <Description>Library of commonly used transformations and filtering of progress reports exposed as extension methods.</Description>
+    <PackageTags>progress, IProgress, IProgress&lt;T&gt;, report progress, progress reporting, progress filter, progress filtering, progress map, progress mapping</PackageTags> 
   </PropertyGroup>
+
 </Project>
