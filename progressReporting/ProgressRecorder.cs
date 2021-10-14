@@ -8,6 +8,7 @@ namespace progressReporting
     {
         public readonly List<TProgress> _record = new();
         public TProgress this[Int32 index] => this._record[index];
+        public TProgress this[Index index] => this._record[index];
         public void Report(TProgress value) => this._record.Add(value);
         public IEnumerator<TProgress> GetEnumerator() => this._record.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

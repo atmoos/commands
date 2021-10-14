@@ -14,9 +14,17 @@ namespace progressReporting
         {
             return new ProgressZip<TProgress>(progress, other);
         }
+        public static IProgress<TProgress> AsProgress<TProgress>(this CancellationToken token)
+        {
+            return new CancellationAdapter<TProgress>(token);
+        }
         public static IProgress<TProgress> Cancellable<TProgress>(this IProgress<TProgress> progress, CancellationToken token)
         {
             return progress.Zip(new CancellationAdapter<TProgress>(token));
+        }
+        public static IProgress<TProgress> ToProgress<TProgress>(this Action<TProgress> observer)
+        {
+            return new ObservableProgress<TProgress>(observer);
         }
         public static IProgress<TProgress> Observable<TProgress>(this IProgress<TProgress> progress, Action<TProgress> observer)
         {
