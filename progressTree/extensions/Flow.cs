@@ -8,6 +8,10 @@ namespace progressTree.extensions
 {
     public static class Flow
     {
+        public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection)
+        {
+            return progress.Enumerate<ICollection<TElement>, TElement>(collection, CancellationToken.None, (p, c) => p.Schedule(c.Count));
+        }
         public static IEnumerable<TElement> Enumerate<TElement>(this Progress progress, ICollection<TElement> collection, CancellationToken token)
         {
             return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Schedule(c.Count));
