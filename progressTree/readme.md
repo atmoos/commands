@@ -1,8 +1,3 @@
-ToDo:
-- No performance optimisations yet...
-
-
-
 # Progress Tree
 Reporting the progress of some process is usually a valuable piece of information for the user of a piece of software, but by no means something trivial to implement. The dotnet interface `IProgress<T>` is a good starting point to build on, but itself does not provide a pattern by which meaningful progress can be reported.
 
@@ -31,6 +26,13 @@ Usually processes branch out into (sequential) sub tasks, which themselves might
 This library abstracts that away from each sub task and maps the _process tree_ automatically.
 
 No sub task needs to have any knowledge about the overall process in which it is embedded.
+
+## ToDos
+This is an incomplete list of open topics:
+
+- API Changes: Some constructs are a bit verbose or semantically clumsy.
+- Performance: The performance impact is likely quite significant. I aim to improve on this.
+- More efficient way to disable progress reporting by injecting a top-level empty progress reporter.
 
 # Examples
 These are very basic examples of how this library can (and should) be used. There are extension methods available that simplify some scenarios.
