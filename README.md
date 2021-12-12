@@ -35,6 +35,7 @@ The four driving principles governing the design of this library are:
 - Commands support __cancellation__
 - Commands report on the current __progress__
 - Results and arguments are passed from command to command fully __typed__ and [null safe](https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references)
+- Failure semantics is none other than __standard C# error semantics__.
 
 ## Ideas to explore
 - Deal with ``IAsyncEnumerable<T>`` elegantly.
