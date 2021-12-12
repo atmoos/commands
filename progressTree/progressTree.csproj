@@ -2,7 +2,7 @@
   <Import Project="../commands.pack.xml"/>
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>Atmoos.Progress.Tree</PackageId>
     <Description>Library that enables hierarchical progress reporting. Sequential and parallel reporting are supported, both with three reporting models.</Description>
