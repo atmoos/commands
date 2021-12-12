@@ -10,7 +10,7 @@ namespace progressTreeTest
 {
     public sealed class ReporterTest : IExportedProgressTest
     {
-        private const Int32 STEPS = 2;
+        private const Int32 steps = 2;
         private readonly Progress root;
         private readonly Reporter reporter;
         private readonly ProgressRecorder<Double> progress;
@@ -18,7 +18,7 @@ namespace progressTreeTest
         {
             this.progress = new ProgressRecorder<Double>();
             this.root = Progress.Create(this.progress);
-            this.reporter = new Reporter(this.root, ProgressDriver.Create(STEPS), this.progress);
+            this.reporter = new Reporter(this.root, ProgressDriver.Create(steps), this.progress);
         }
         [Fact]
         public void ZeroIsReportedUponCreation()
@@ -68,7 +68,7 @@ namespace progressTreeTest
         [Fact]
         public void ExportedProgressIsScaled()
         {
-            const Double scale = 1d / STEPS;
+            const Double scale = 1d / steps;
             var input = new[] { 0d, 0.25, 0.5, 0.75, 1 };
             IProgress<Double> progress = this.reporter.Export();
             this.reporter.Report(); // -> 1/STEPS
@@ -91,7 +91,7 @@ namespace progressTreeTest
         [Fact]
         public void ExportedProgressIsStrictlyMonotonic()
         {
-            const Double scale = 1d / STEPS;
+            const Double scale = 1d / steps;
             var input = new[] { 0d, 0.25, 0.5, 0.4, 0.5, 0.75, 1 };
             IProgress<Double> progress = this.reporter.Export();
             this.reporter.Report(); // -> 1/STEPS

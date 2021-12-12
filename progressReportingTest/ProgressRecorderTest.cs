@@ -8,7 +8,7 @@ namespace progressReportingTest
 {
     public sealed class ProgressRecorderTest
     {
-        private readonly ProgressRecorder<Int32> recorder = new ProgressRecorder<Int32>();
+        private readonly ProgressRecorder<Int32> recorder = new();
 
         [Fact]
         public void RecorderRecordsInSameOrderAsValuesAreAdded()

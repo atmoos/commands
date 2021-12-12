@@ -5,7 +5,7 @@ namespace progressReportingTest
 {
     public static class Convenience
     {
-        private static readonly Random RAND = new Random(3);
+        private static readonly Random random = new(3);
         public static IEnumerable<TProgress> Report<TProgress>(IProgress<TProgress> progress, IEnumerable<TProgress> source)
         {
             foreach(var element in source) {
@@ -16,7 +16,7 @@ namespace progressReportingTest
         public static IEnumerable<Int32> RandomIntegers()
         {
             while(true) {
-                yield return RAND.Next();
+                yield return random.Next();
             }
         }
     }

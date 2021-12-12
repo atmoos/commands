@@ -6,8 +6,8 @@ namespace progressReportingTest
 {
     public sealed class BoundedProgressTest
     {
-        private static readonly Double[] Input = new[] { -2d, 0d, Math.PI, 9, Double.PositiveInfinity, 1.23d, -Math.E, 2d, 9d, 3d };
-        private readonly ProgressRecorder<Double> actualProgress = new ProgressRecorder<Double>();
+        private static readonly Double[] input = new[] { -2d, 0d, Math.PI, 9, Double.PositiveInfinity, 1.23d, -Math.E, 2d, 9d, 3d };
+        private readonly ProgressRecorder<Double> actualProgress = new();
 
         [Fact]
         public void CreatingWithEmptyRangeThrows()
@@ -30,7 +30,7 @@ namespace progressReportingTest
         }
         private void Assert(IProgress<Double> progress, params Double[] expected)
         {
-            foreach(var value in Input) {
+            foreach(var value in input) {
                 progress.Report(value);
             }
             Xunit.Assert.Equal(expected, this.actualProgress);

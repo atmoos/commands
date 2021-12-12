@@ -105,7 +105,7 @@ namespace progressTreeTest
 
     public sealed class TemporalDriverTest : IDriverTest
     {
-        private readonly DriverTestHarness harness = new DriverTestHarness(ProgressDriver.Create(TimeSpan.FromMilliseconds(8)), precision: 9);
+        private readonly DriverTestHarness harness = new (ProgressDriver.Create(TimeSpan.FromMilliseconds(8)), precision: 9);
         [Theory]
         [MemberData(nameof(DriverTestHarness.ChildProgress), MemberType = typeof(DriverTestHarness))]
         public void AccumulateIsBoundedByAdvance(Double childProgress) => this.harness.AccumulateIsBoundedByAdvance(childProgress);

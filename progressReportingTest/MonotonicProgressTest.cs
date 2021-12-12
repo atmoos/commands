@@ -7,7 +7,7 @@ namespace progressReportingTest
 {
     public sealed class MonotonicProgressTest
     {
-        private static readonly Double[] Input = new Double[] { -1, 0, -2, 0, -3, 0, 1, -4, 2, -4, -1.5, 1, -4, -2, -5, 1.5, 3, -5, 3, 4, -6 };
+        private static readonly Double[] input = new Double[] { -1, 0, -2, 0, -3, 0, 1, -4, 2, -4, -1.5, 1, -4, -2, -5, 1.5, 3, -5, 3, 4, -6 };
 
         public interface IMonotonicTest
         {
@@ -19,7 +19,7 @@ namespace progressReportingTest
 
         public sealed class OnDouble : IMonotonicTest
         {
-            private readonly ProgressRecorder<Double> actualSequence = new ProgressRecorder<Double>();
+            private readonly ProgressRecorder<Double> actualSequence = new();
 
             [Fact]
             public void MonotonicIncreasingFiltersSequenceWeaklyIncreasing()
@@ -48,7 +48,7 @@ namespace progressReportingTest
         }
         public sealed class OnGeneric : IMonotonicTest
         {
-            private readonly ProgressRecorder<Double> actualSequence = new ProgressRecorder<Double>();
+            private readonly ProgressRecorder<Double> actualSequence = new();
 
             [Fact]
             public void MonotonicIncreasingFiltersSequenceWeaklyIncreasing()
@@ -78,7 +78,7 @@ namespace progressReportingTest
         private static void Assert(IEnumerable<Double> actual, params Double[] expected) => Xunit.Assert.Equal(expected, actual);
         private static void RunFilter(IProgress<Double> progress)
         {
-            foreach(Double value in Input) {
+            foreach(Double value in input) {
                 progress.Report(value);
             }
         }

@@ -17,8 +17,8 @@ namespace progressTree.extensions
             return progress.Enumerate<ICollection<TElement>, TElement>(collection, token, (p, c) => p.Schedule(c.Count, subProgress));
         }
         private static IEnumerable<TElement> Enumerate<TEnumerable, TElement>(this Progress progress, TEnumerable elements, CancellationToken token, Func<Progress, TEnumerable, Reporter> create)
-            where TElement : IReportProgress
             where TEnumerable : IEnumerable<TElement>
+            where TElement : IReportProgress
         {
             token.ThrowIfCancellationRequested();
             using(Reporter reporter = create(progress, elements)) {

@@ -49,7 +49,7 @@ namespace progressTreeTest
         [Fact]
         public void ScheduledReportsAreStable()
         {
-            List<Double> expected = new List<Double>();
+            var expected = new List<Double>();
             var progressReporter = Progress.Create(this.actualProgress);
             using(progressReporter.Schedule(4)) {
                 expected.Add(0);
@@ -255,7 +255,7 @@ namespace progressTreeTest
         [Fact]
         public void OneIsReportedUponDisposalOfIncrementalReportingOnSubProgressWhenReportComesDelayed()
         {
-            const int steps = 2;
+            const Int32 steps = 2;
             using(var r = Progress.Create(Extensions.Empty<Double>()).Schedule(steps, this.actualProgress)) {
                 foreach(var _ in Enumerable.Range(0, steps + 1)) {
                     r.Report();

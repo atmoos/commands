@@ -1,23 +1,23 @@
 using System;
-using System.Linq;
-using System.Diagnostics;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 using progressTree.extensions;
+using Xunit;
 
 namespace progressTreeTest.extensions
 {
     public sealed class TimerStreamTest
     {
         [Fact]
-        public void ConstructorThrowsOnIntervallOfZero()
+        public void ConstructorThrowsOnIntervalOfZero()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new TimerStream(interval: TimeSpan.Zero));
         }
         [Fact]
-        public void ConstructorThrowsOnNegativeIntervall()
+        public void ConstructorThrowsOnNegativeInterval()
         {
             var negativeInterval = TimeSpan.FromMilliseconds(-1);
             Assert.Throws<ArgumentOutOfRangeException>(() => new TimerStream(interval: negativeInterval));
@@ -57,7 +57,7 @@ namespace progressTreeTest.extensions
             const Int32 count = 6;
             const Int32 intervalMs = 16;
             const Int32 cancelAfterMs = (Int32)(intervalMs * ((count / 2d) - 0.5));
-            using(CancellationTokenSource cts = new CancellationTokenSource(cancelAfterMs)) {
+            using(var cts = new CancellationTokenSource(cancelAfterMs)) {
                 IAsyncEnumerable<TimeSpan> stream = new TimerStream(TimeSpan.FromMilliseconds(intervalMs));
                 await Assert.ThrowsAsync<TaskCanceledException>(() => Take(stream, count, cts.Token)).ConfigureAwait(false);
             }
