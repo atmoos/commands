@@ -27,6 +27,11 @@ This library abstracts that away from each sub task and maps the _process tree_ 
 
 No sub task needs to have any knowledge about the overall process in which it is embedded.
 
+## Other Projects
+There are some other projects out there that follow similar approaches.
+- [progress-hierarchy](https://github.com/fuzzykiller/progress-hierarchy) which is very similar in usage
+- [ProgressReporting](https://github.com/PFalkowski/ProgressReporting) which is far less generalized
+
 ## ToDos
 This is an incomplete list of open topics:
 
