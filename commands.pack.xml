@@ -1,7 +1,6 @@
 <Project>
 <!-- Packaging info common to all projects within the commands project -->
   <PropertyGroup>
-    <Version>0.1.0</Version>
     <Copyright>Thomas Kägi</Copyright>
     <PackageProjectUrl>https://github.com/atmoos/commands</PackageProjectUrl>
     <RepositoryUrl>https://github.com/atmoos/commands</RepositoryUrl>

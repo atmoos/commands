@@ -1,9 +1,8 @@
-namespace progressTreeTest
+namespace progressTreeTest;
+
+public interface IExportedProgressTest
 {
-    public interface IExportedProgressTest
-    {
-        void ExportedProgressIsScaled();
-        void ExportedProgressIsStrictlyMonotonic();
-        void OutOfBoundExportedProgressIsIgnored();
-    }
+    void ExportedProgressIsScaled();
+    void ExportedProgressIsStrictlyMonotonic();
+    void OutOfBoundExportedProgressIsIgnored();
 }

@@ -7,13 +7,25 @@
 #### Core EditorConfig Options ####
 
 #### .NET Coding Conventions ####
-dotnet_style_predefined_type_for_member_access = false:suggestion
-dotnet_style_predefined_type_for_locals_parameters_members = false:suggestion
+dotnet_style_predefined_type_for_member_access = false:warning
+dotnet_style_predefined_type_for_locals_parameters_members = false:warning
 dotnet_style_qualification_for_field = true:suggestion
 
+# Suggest more modern language features when available
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+
 # .NET formatting rules
-dotnet_sort_system_directives_first = true
 csharp_prefer_braces = true:suggestion
+csharp_preserve_single_line_blocks = true
+dotnet_sort_system_directives_first = true
+dotnet_style_namespace_match_folder = true:warning
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_new_line_before_open_brace = methods, properties, types, lambdas
+csharp_space_after_keywords_in_control_flow_statements = false
 
 #### Diagnostic configuration ####
 

@@ -5,41 +5,40 @@ using System.Linq;
 using progressReporting;
 using progressReporting.concurrent;
 
-namespace progressTree
+namespace progressTree;
+
+public sealed class ConcurrentReporter : IEnumerable<Progress>, IDisposable
 {
-    public sealed class ConcurrentReporter : IEnumerable<Progress>, IDisposable
+    private readonly Reporter parent;
+    private readonly List<Progress> concurrentProgress;
+    public Progress this[Int32 index] => this.concurrentProgress[index];
+    public Int32 Count => this.concurrentProgress.Count;
+    internal ConcurrentReporter(Reporter parent, Norm<Double> norm, in Int32 concurrencyLevel)
     {
-        private readonly Reporter parent;
-        private readonly List<Progress> concurrentProgress;
-        public Progress this[Int32 index] => this.concurrentProgress[index];
-        public Int32 Count => this.concurrentProgress.Count;
-        internal ConcurrentReporter(Reporter parent, Norm<Double> norm, in Int32 concurrencyLevel)
-        {
-            this.parent = parent;
-            this.concurrentProgress = parent.Export().Concurrent(norm, concurrencyLevel).Select(Progress.Create).ToList();
-        }
-
-        public IEnumerator<Progress> GetEnumerator() => this.concurrentProgress.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-        public void Dispose() => this.parent.Dispose();
+        this.parent = parent;
+        this.concurrentProgress = parent.Export().Concurrent(norm, concurrencyLevel).Select(Progress.Create).ToList();
     }
 
-    public sealed class ConcurrentReporter<T> : IEnumerable<(T item, Progress progress)>, IDisposable
+    public IEnumerator<Progress> GetEnumerator() => this.concurrentProgress.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    public void Dispose() => this.parent.Dispose();
+}
+
+public sealed class ConcurrentReporter<T> : IEnumerable<(T item, Progress progress)>, IDisposable
+{
+    private readonly Reporter parent;
+    private readonly List<(T item, Progress progress)> concurrentProgress;
+    internal ConcurrentReporter(Reporter parent, Norm<Double> norm, IEnumerable<T> items)
     {
-        private readonly Reporter parent;
-        private readonly List<(T item, Progress progress)> concurrentProgress;
-        internal ConcurrentReporter(Reporter parent, Norm<Double> norm, IEnumerable<T> items)
-        {
-            this.parent = parent;
-            this.concurrentProgress = parent.Export().Concurrent(norm, items).Select(v => (v.item, Progress.Create(v.progress))).ToList();
-        }
-
-        public IEnumerator<(T item, Progress progress)> GetEnumerator() => this.concurrentProgress.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-        public void Dispose() => this.parent.Dispose();
+        this.parent = parent;
+        this.concurrentProgress = parent.Export().Concurrent(norm, items).Select(v => (v.item, Progress.Create(v.progress))).ToList();
     }
+
+    public IEnumerator<(T item, Progress progress)> GetEnumerator() => this.concurrentProgress.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+
+    public void Dispose() => this.parent.Dispose();
 }

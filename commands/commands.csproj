@@ -2,6 +2,7 @@
   <Import Project="../commands.pack.xml"/>
 
   <PropertyGroup>
+    <Version>0.1.0</Version>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>Atmoos.Commands</PackageId>
@@ -10,6 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.Progress.Tree" Version="0.1.0" />
+    <PackageReference Include="Atmoos.Progress.Tree" Version="0.1.1" />
   </ItemGroup>
 </Project>
