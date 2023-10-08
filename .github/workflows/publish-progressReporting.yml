@@ -6,12 +6,12 @@ on:
     types: [closed]
     branches: [ "master" ]
     paths: 
-      - './**/progressReporting.csproj'
+      - '**/progressReporting.csproj'
 
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
-  Project: './progressReporting/progressReporting.csproj'
+  Project: 'progressReporting/progressReporting.csproj'
   DotNetVersion: 7.0.x
 
 defaults:
