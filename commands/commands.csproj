@@ -11,6 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Atmoos.Progress.Tree" Version="0.1.0" />
+    <PackageReference Include="Atmoos.Progress.Tree" Version="0.1.1" />
   </ItemGroup>
 </Project>
