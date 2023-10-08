@@ -57,7 +57,8 @@ namespace progressTreeTest.extensions
             const Int32 count = 6;
             const Int32 intervalMs = 16;
             const Int32 cancelAfterMs = (Int32)(intervalMs * ((count / 2d) - 0.5));
-            using(var cts = new CancellationTokenSource(cancelAfterMs)) {
+            using (var cts = new CancellationTokenSource(cancelAfterMs))
+            {
                 IAsyncEnumerable<TimeSpan> stream = new TimerStream(TimeSpan.FromMilliseconds(intervalMs));
                 await Assert.ThrowsAsync<TaskCanceledException>(() => Take(stream, count, cts.Token)).ConfigureAwait(false);
             }
@@ -66,7 +67,7 @@ namespace progressTreeTest.extensions
         public async Task WorkOverheadIsCompensatedByIntegerMultiplesOfTheTargetInterval()
         {
             const Int32 count = 8;
-            const Int32 intervalMs = 20; // values lower than 16ms can cause flaky tests
+            const Int32 intervalMs = 48; // values lower than 16ms can cause flaky tests
             const Int32 extendendIntervalMs = (Int32)(1.2 * intervalMs);
             Int32 expectedOverheadFactor = (Int32)Math.Ceiling(extendendIntervalMs / (Decimal)intervalMs);
             Func<Task> workOverhead = () => Task.Delay(extendendIntervalMs);
@@ -82,10 +83,12 @@ namespace progressTreeTest.extensions
         {
             var timer = Stopwatch.StartNew();
             var timeStamps = new List<TimeStamp>(count);
-            await foreach(var timeStamp in stream.WithCancellation(token).ConfigureAwait(false)) {
+            await foreach (var timeStamp in stream.WithCancellation(token).ConfigureAwait(false))
+            {
                 var stamp = new TimeStamp(timer.Elapsed, timeStamp);
                 await work().ConfigureAwait(false);
-                if(timeStamps.Count == count) {
+                if (timeStamps.Count == count)
+                {
                     break;
                 }
                 timeStamps.Add(stamp);
