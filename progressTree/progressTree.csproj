@@ -2,6 +2,7 @@
   <Import Project="../commands.pack.xml"/>
 
   <PropertyGroup>
+    <Version>0.1.0</Version>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>Atmoos.Progress.Tree</PackageId>
