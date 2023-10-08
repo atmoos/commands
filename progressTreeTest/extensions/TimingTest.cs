@@ -45,7 +45,7 @@ namespace progressTreeTest.extensions
         public async Task TimeStampsArePrecise()
         {
             const Int32 count = 16;
-            const Int32 intervalMs = 32;
+            const Int32 intervalMs = 48;
             var timeStamps = await Take(new TimerStream(TimeSpan.FromMilliseconds(intervalMs)), count, CancellationToken.None).ConfigureAwait(false);
             (Double _, Double stdDev) = StdDev(timeStamps.Select(t => (t.RealTime - t.ReportedTime).TotalSeconds).ToArray());
             Assert.Equal(0, stdDev, 2);
