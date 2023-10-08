@@ -3,8 +3,8 @@
 
   <PropertyGroup>
     <Version>0.1.2</Version>
-    <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <TargetFramework>net7.0</TargetFramework>
     <PackageId>Atmoos.Progress.Reporting</PackageId>
     <Description>Library of commonly used transformations and filtering of progress reports exposed as extension methods.</Description>
     <PackageTags>progress, IProgress, IProgress&lt;T&gt;, report progress, progress reporting, progress filter, progress filtering, progress map, progress mapping</PackageTags> 
