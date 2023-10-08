@@ -1,9 +1,8 @@
 using System;
 
-namespace commands.tools
+namespace commands.tools;
+
+internal interface ICountable
 {
-    internal interface ICountable
-    {
-        Int32 Count { get; }
-    }
+    Int32 Count { get; }
 }

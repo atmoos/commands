@@ -2,22 +2,21 @@
 using System.Threading.Tasks;
 using progressTree;
 
-namespace commands
+namespace commands;
+
+public interface ICommand
 {
-    public interface ICommand
-    {
-        Task Execute(CancellationToken cancellationToken, Progress progress);
-    }
-    public interface ICommandIn<in TArgument>
-    {
-        Task Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
-    }
-    public interface ICommandOut<TResult>
-    {
-        Task<TResult> Execute(CancellationToken cancellationToken, Progress progress);
-    }
-    public interface ICommand<in TArgument, TResult>
-    {
-        Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
-    }
+    Task Execute(CancellationToken cancellationToken, Progress progress);
+}
+public interface ICommandIn<in TArgument>
+{
+    Task Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
+}
+public interface ICommandOut<TResult>
+{
+    Task<TResult> Execute(CancellationToken cancellationToken, Progress progress);
+}
+public interface ICommand<in TArgument, TResult>
+{
+    Task<TResult> Execute(TArgument argument, CancellationToken cancellationToken, Progress progress);
 }

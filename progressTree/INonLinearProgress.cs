@@ -1,10 +1,9 @@
 using System;
 
-namespace progressTree
+namespace progressTree;
+
+public interface INonLinearProgress<TProgress>
 {
-    public interface INonLinearProgress<TProgress>
-    {
-        TProgress Progress();
-        Double Linearise(TProgress progress);
-    }
+    TProgress Progress();
+    Double Linearise(TProgress progress);
 }

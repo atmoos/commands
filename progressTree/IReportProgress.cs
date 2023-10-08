@@ -1,8 +1,7 @@
-namespace progressTree
+namespace progressTree;
+
+public interface IReportProgress
 {
-    public interface IReportProgress
-    {
-        // Marker interface for all things reporting progress
-        // using the progress tree within this library.
-    }
+    // Marker interface for all things reporting progress
+    // using the progress tree within this library.
 }
