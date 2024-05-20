@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DotNetVersion }}
-      - uses: atmoos/publish-nuget-neo@v1.1.0-alpha2
+      - uses: atmoos/publish-nuget-neo@v1.1.0-alpha3
         with:
           NUGET_KEY: ${{secrets.NEW_COMMAND_VERSION}}
           PROJECT_FILE_PATH: ${{env.Project}}
