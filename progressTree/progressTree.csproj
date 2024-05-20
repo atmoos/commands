@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../commands.pack.xml" />
+  <Import Project="../commands.pack.targets" />
 
   <PropertyGroup>
     <Version>0.1.0</Version>
