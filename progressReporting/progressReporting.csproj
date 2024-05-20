@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../commands.pack.xml"/>
+  <Import Project="../commands.pack.targets" />
 
   <PropertyGroup>
-    <Version>0.1.2</Version>
+    <Version>0.1.3</Version>
     <Nullable>enable</Nullable>
     <TargetFramework>net7.0</TargetFramework>
     <PackageId>Atmoos.Progress.Reporting</PackageId>
