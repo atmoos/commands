@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../commands.pack.xml"/>
+  <Import Project="../commands.pack.xml" />
 
   <PropertyGroup>
     <Version>0.1.0</Version>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageId>Atmoos.Progress.Tree</PackageId>
     <Description>Library that enables hierarchical progress reporting. Sequential and parallel reporting are supported, both with three reporting models.</Description>
